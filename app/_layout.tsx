@@ -28,7 +28,13 @@ export default function RootLayout() {
       <Stack initialRouteName="registration">
         <Stack.Screen name="registration" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="(modals)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="(modals)"
+          options={{
+            headerShown: false,
+            presentation: "modal",
+          }}
+        />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />

@@ -5,8 +5,6 @@ export default function ModalsLayout() {
     <Stack
       screenOptions={{
         headerShown: false,
-        presentation: "modal",
-        animation: "slide_from_bottom",
       }}
     >
       <Stack.Screen name="clue-finding" />
