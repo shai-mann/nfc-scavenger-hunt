@@ -8,6 +8,7 @@
     "scheme": "nfcscavengerhunt",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "deepLinks": true,
     "ios": {
       "supportsTablet": true
     },
