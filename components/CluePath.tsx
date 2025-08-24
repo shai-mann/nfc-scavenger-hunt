@@ -2,6 +2,7 @@ import { Clue } from "@/app/(tabs)";
 import { generateSinePath } from "@/lib/generate-sine-path";
 import { useMemo } from "react";
 import { Dimensions, FlatList, TouchableOpacity, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
 import { Text } from "./ui/text";
 
@@ -15,6 +16,8 @@ interface CluePathProps {
 }
 
 export const CluePath = ({ clues }: CluePathProps) => {
+  const insets = useSafeAreaInsets();
+
   // Generate path
   const path = useMemo(
     () =>
@@ -30,7 +33,7 @@ export const CluePath = ({ clues }: CluePathProps) => {
   console.log(path);
 
   return (
-    <View className="size-full relative bg-red-500">
+    <View className="size-full flex-1 bg-red-500">
       <Svg
         height="100%"
         width="100%"
@@ -50,9 +53,10 @@ export const CluePath = ({ clues }: CluePathProps) => {
         renderItem={ClueComponent}
         className="flex flex-col w-full h-full absolute top-0 left-0"
         contentContainerStyle={{
-          paddingVertical: 50,
           alignItems: "center",
           justifyContent: "center",
+          paddingBottom: insets.bottom + 50, // extra padding for tabs
+          paddingTop: insets.top,
         }}
         showsVerticalScrollIndicator={false}
       />
