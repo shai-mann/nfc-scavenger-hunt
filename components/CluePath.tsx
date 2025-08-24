@@ -1,9 +1,9 @@
 import { Clue } from "@/app/(tabs)";
 import { generateSinePath } from "@/lib/generate-sine-path";
-import { useMemo } from "react";
-import { Dimensions, FlatList, TouchableOpacity, View } from "react-native";
+import { useMemo, useState } from "react";
+import { Dimensions, ScrollView, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Svg, { Path } from "react-native-svg";
+import Svg, { Circle, Path } from "react-native-svg";
 import { Text } from "./ui/text";
 
 const DIMENSIONS = Dimensions.get("window");
@@ -18,49 +18,64 @@ interface CluePathProps {
 export const CluePath = ({ clues }: CluePathProps) => {
   const insets = useSafeAreaInsets();
 
+  const [contentHeight, setContentHeight] = useState(0);
+
   // Generate path
-  const path = useMemo(
+  const { d: path, pts } = useMemo(
     () =>
       generateSinePath({
         width: DIMENSIONS.width,
-        height: DIMENSIONS.height,
+        height: contentHeight,
         amplitude: AMPLITUDE,
         frequency: 1,
+        points: 2,
       }),
-    []
+    [contentHeight]
   );
 
-  console.log(path);
+  console.log(contentHeight);
 
   return (
-    <View className="size-full flex-1 bg-red-500">
-      <Svg
-        height="100%"
-        width="100%"
-        className="absolute top-0 left-0 pointer-events-none"
-      >
-        <Path
-          d={path}
-          stroke="black"
-          strokeWidth={3}
-          strokeDasharray={[10, 8]}
-          fill="none"
-        />
-      </Svg>
-      <FlatList
-        data={clues}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={ClueComponent}
-        className="flex flex-col w-full h-full absolute top-0 left-0"
-        contentContainerStyle={{
-          alignItems: "center",
-          justifyContent: "center",
+    <ScrollView className="flex-1">
+      <View
+        className="relative"
+        style={{
           paddingBottom: insets.bottom + 50, // extra padding for tabs
-          paddingTop: insets.top,
         }}
-        showsVerticalScrollIndicator={false}
-      />
-    </View>
+      >
+        <Svg
+          height={contentHeight}
+          width={DIMENSIONS.width}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+          }}
+        >
+          <Path
+            d={path}
+            stroke="black"
+            strokeWidth={3}
+            strokeDasharray={[10, 8]}
+            fill="none"
+          />
+          {pts.map((pt, index) => (
+            <Circle key={index} cx={pt.x} cy={pt.y} r={5} fill="green" />
+          ))}
+        </Svg>
+        <View
+          className="flex flex-col items-center"
+          onLayout={(event) => {
+            const { height } = event.nativeEvent.layout;
+            setContentHeight(height);
+          }}
+        >
+          {clues.map((clue, index) => (
+            <ClueComponent key={clue.id} item={clue} index={index} />
+          ))}
+        </View>
+      </View>
+    </ScrollView>
   );
 };
 

@@ -20,14 +20,24 @@ export function generateSinePath({
   frequency: number;
   points?: number;
 }) {
+  const pts = [{ x: width / 2, y: 0 }];
+  // A full sin wave is: A * sin(B(x - C)) + D
+  // A = amplitude
+  // B = frequency
+  // C = phase shift
+  // D = vertical shift
+  // In our case, D = width / 2 (to center the wave), C = 0, B = frequency * 2 * PI, A = amplitude
+  const B = frequency * 2 * Math.PI;
+  const A = amplitude;
+
   const step = height / points;
   // Start at the center of the canvas, at the top of the screen
-  let d = `M ${width / 2} 0 L ${width / 2} ${height}`;
-  //   for (let i = 0; i <= points; i++) {
-  //     const y = i * step;
-  //     const x =
-  //       width / 2 + amplitude * Math.sin((y / height) * frequency * Math.PI * 2);
-  //     d += ` L ${x} ${y}`;
-  //   }
-  return d;
+  let d = `M ${width / 2} 0`;
+  for (let i = 0; i <= points; i++) {
+    const y = i * step;
+    const x = width / 2 + A * Math.sin(y * B);
+    d += ` L ${x} ${y}`;
+    pts.push({ x, y });
+  }
+  return { d, pts };
 }
