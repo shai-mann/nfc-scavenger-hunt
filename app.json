@@ -10,7 +10,11 @@
     "newArchEnabled": true,
     "deepLinks": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.shaimr.nfcscavengerhunt",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -38,6 +42,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "b7b216f4-fb78-4c02-aa28-be52f939e4e4"
+      }
     }
   }
 }
