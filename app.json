@@ -48,6 +48,20 @@
       "eas": {
         "projectId": "b7b216f4-fb78-4c02-aa28-be52f939e4e4"
       }
-    }
+    },
+    "fonts": [
+      {
+        "asset": "assets/fonts/Inter-Regular.ttf",
+        "family": "Inter"
+      },
+      {
+        "asset": "assets/fonts/Inter-Medium.ttf",
+        "family": "Inter-Medium"
+      },
+      {
+        "asset": "assets/fonts/Inter-Bold.ttf",
+        "family": "Inter-Bold"
+      }
+    ]
   }
 }

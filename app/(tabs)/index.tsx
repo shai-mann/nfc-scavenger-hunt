@@ -97,7 +97,9 @@ export default function HomePage() {
   return (
     <SafeAreaView className="flex-1 bg-white flex flex-col">
       <View className="px-5 py-2 flex flex-col items-center justify-center border-secondary border-b">
-        <Text variant="h1">NFC Hunt</Text>
+        <Text variant="h1" className="text-gray-800 font-semibold">
+          Bits&apos; Hunt
+        </Text>
         <Text variant="h4" className="text-gray-500">
           Rank: 1
         </Text>
