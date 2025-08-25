@@ -62,6 +62,21 @@ const CLUES: Clue[] = [
     name: "Clue 10",
     description: "This is the tenth clue",
   },
+  {
+    id: 11,
+    name: "Clue 11",
+    description: "This is the eleventh clue",
+  },
+  {
+    id: 12,
+    name: "Clue 12",
+    description: "This is the twelfth clue",
+  },
+  {
+    id: 13,
+    name: "Clue 13",
+    description: "This is the thirteenth clue",
+  },
 ];
 
 export default function HomePage() {
