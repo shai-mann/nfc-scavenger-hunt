@@ -43,7 +43,7 @@ export const CluePath = ({ clues }: CluePathProps) => {
   );
 
   return (
-    <ScrollView className="flex-1">
+    <ScrollView className="flex-1 bg-secondary/50">
       <View
         className="relative"
         style={{
