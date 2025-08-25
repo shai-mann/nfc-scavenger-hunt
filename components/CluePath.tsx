@@ -62,7 +62,7 @@ export const CluePath = ({ clues }: CluePathProps) => {
         >
           <Path
             d={path}
-            stroke="black"
+            stroke="#DCDEDF"
             strokeWidth={3}
             strokeDasharray={[10, 8]}
             fill="none"
@@ -127,16 +127,17 @@ const ClueComponent = ({ item, index }: { item: Clue; index: number }) => {
         <Animated.View
           className={cn("rounded-full items-center justify-center", {
             "bg-primary": item.isFound,
-            "bg-gray-300": !item.isFound,
+            "border-2 border-primary border-dashed": !item.isFound,
           })}
           style={animatedStyle}
         >
-          <Text
-            className={cn("font-bold", {
-              "text-white": item.isFound,
-              "text-black": !item.isFound,
+          <View
+            className={cn("absolute self-center rounded-full size-1/2", {
+              "bg-primary": !item.isFound,
+              "bg-transparent": item.isFound,
             })}
-          >
+          />
+          <Text className="font-bold text-white">
             {item.isFound ? item.name : "???"}
           </Text>
         </Animated.View>
