@@ -1,7 +1,13 @@
 import { Clue } from "@/app/(tabs)";
 import { generateSinePath } from "@/lib/generate-sine-path";
+import { cn } from "@/lib/utils";
 import { useMemo, useState } from "react";
-import { Dimensions, ScrollView, TouchableOpacity, View } from "react-native";
+import { Dimensions, Pressable, ScrollView, View } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
 import { Text } from "./ui/text";
@@ -41,6 +47,7 @@ export const CluePath = ({ clues }: CluePathProps) => {
       <View
         className="relative"
         style={{
+          marginTop: 15, // needed to allow the shadow from the clue to
           paddingBottom: insets.bottom + 50, // extra padding for tabs
         }}
       >
@@ -81,8 +88,29 @@ export const CluePath = ({ clues }: CluePathProps) => {
 };
 
 const ClueComponent = ({ item, index }: { item: Clue; index: number }) => {
+  // offset calculations
   const angle = index * STEP;
   const horizontalOffset = Math.sin(angle) * AMPLITUDE;
+
+  // Shared values for animation
+  const scale = useSharedValue(1);
+
+  // Animated style that updates on UI thread
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: scale.value }],
+      width: CLUE_SIZE,
+      height: CLUE_SIZE,
+    };
+  });
+
+  const handlePressIn = () => {
+    scale.value = withSpring(0.95);
+  };
+
+  const handlePressOut = () => {
+    scale.value = withSpring(1);
+  };
 
   return (
     <View
@@ -90,20 +118,29 @@ const ClueComponent = ({ item, index }: { item: Clue; index: number }) => {
         transform: [{ translateX: horizontalOffset }],
       }}
     >
-      <View
-        style={{
-          backgroundColor: "#4f46e5",
-          width: CLUE_SIZE,
-          height: CLUE_SIZE,
-          borderRadius: "50%",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
+      <Pressable
+        disabled={!item.isFound}
+        onPress={() => console.log("pressed clue", item.id)}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
       >
-        <TouchableOpacity>
-          <Text style={{ color: "#fff", fontWeight: "bold" }}>{item.name}</Text>
-        </TouchableOpacity>
-      </View>
+        <Animated.View
+          className={cn("rounded-full items-center justify-center", {
+            "bg-primary": item.isFound,
+            "bg-gray-300": !item.isFound,
+          })}
+          style={animatedStyle}
+        >
+          <Text
+            className={cn("font-bold", {
+              "text-white": item.isFound,
+              "text-black": !item.isFound,
+            })}
+          >
+            {item.isFound ? item.name : "???"}
+          </Text>
+        </Animated.View>
+      </Pressable>
     </View>
   );
 };
