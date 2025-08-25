@@ -11,6 +11,8 @@ const AMPLITUDE = 100;
 const STEP = Math.PI / 2;
 const PERIOD = 750; // the "tightness" of the wave
 
+const CLUE_SIZE = DIMENSIONS.width * 0.2;
+
 interface CluePathProps {
   clues: Clue[];
 }
@@ -25,9 +27,9 @@ export const CluePath = ({ clues }: CluePathProps) => {
     () =>
       generateSinePath({
         width: DIMENSIONS.width,
-        // height of canvas minus half the height of the final clue,
+        // height of canvas minus the height of the final clue,
         // so the line doesn't extend past the final clue!
-        height: contentHeight - DIMENSIONS.width * 0.2,
+        height: contentHeight - CLUE_SIZE,
         amplitude: AMPLITUDE,
         period: PERIOD,
       }),
@@ -47,7 +49,7 @@ export const CluePath = ({ clues }: CluePathProps) => {
           width={DIMENSIONS.width} // TODO: can I remove this and just center the SVG?
           style={{
             position: "absolute",
-            top: DIMENSIONS.width * 0.1,
+            top: CLUE_SIZE / 2,
             left: 0,
           }}
         >
@@ -62,7 +64,7 @@ export const CluePath = ({ clues }: CluePathProps) => {
         <View
           className="flex flex-col items-center"
           style={{
-            gap: PERIOD / 4 - DIMENSIONS.width * 0.2,
+            gap: PERIOD / 4 - CLUE_SIZE,
           }}
           onLayout={(event) => {
             const { height } = event.nativeEvent.layout;
@@ -91,8 +93,8 @@ const ClueComponent = ({ item, index }: { item: Clue; index: number }) => {
       <View
         style={{
           backgroundColor: "#4f46e5",
-          width: DIMENSIONS.width * 0.2,
-          height: DIMENSIONS.width * 0.2,
+          width: CLUE_SIZE,
+          height: CLUE_SIZE,
           borderRadius: "50%",
           justifyContent: "center",
           alignItems: "center",
