@@ -100,7 +100,7 @@ export default function HomePage() {
     <SafeAreaView className="flex-1 bg-white flex flex-col">
       <View className="px-5 py-2 flex flex-col items-center justify-center border-secondary border-b">
         {/* Logo, floating left */}
-        <Image source={Logo} className="absolute left-5 pb-2 size-14" />
+        <Image source={Logo} className="absolute left-5 top-2 size-10" />
 
         <Text variant="h1" className="text-gray-800 font-semibold">
           Bits&apos; Hunt!
@@ -110,7 +110,7 @@ export default function HomePage() {
         </Text>
 
         {/* Rules button, floating right */}
-        <TouchableOpacity className="absolute right-5 mb-2 p-2">
+        <TouchableOpacity className="absolute right-5 top-2 p-2">
           <BookOpen size={20} color="#AD8AD1" />
         </TouchableOpacity>
       </View>
