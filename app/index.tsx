@@ -1,6 +1,10 @@
-import { Redirect } from "expo-router";
+import { router } from "expo-router";
+import { useLayoutEffect } from "react";
 
 export default function Index() {
-  // TODO: in the future we should use /home if the user is registered already!
-  return <Redirect href="/(tabs)" />; // TODO: change to /registration
+  useLayoutEffect(() => {
+    router.replace("/registration");
+  }, []);
+
+  return null;
 }
