@@ -123,7 +123,6 @@ export default function RegistrationPage() {
                   placeholder="Enter username"
                   value={username}
                   onChangeText={setUsername}
-                  autoCapitalize="none"
                   autoCorrect={false}
                 />
               </View>
