@@ -1,14 +1,13 @@
 import { Stack } from "expo-router";
 
-export default function ModalsLayout() {
+export default function ClueDisplayLayout() {
   return (
     <Stack
       screenOptions={{
         headerShown: false,
       }}
     >
-      <Stack.Screen name="clue-finding" />
-      <Stack.Screen name="clue-display" />
+      <Stack.Screen name="[clueId]" />
     </Stack>
   );
 }
