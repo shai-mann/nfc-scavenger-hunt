@@ -1,103 +1,75 @@
-import React, { useState } from 'react';
+import Logo from "@/assets/images/DDlogo.png";
+import { Input } from "@/components/ui/input";
+import { Text } from "@/components/ui/text";
+import { cn } from "@/lib/utils";
+import { router } from "expo-router";
+import React, { useEffect, useRef, useState } from "react";
 import {
-  View,
-  Text,
-  TextInput,
+  Image,
   TouchableOpacity,
-  StyleSheet,
-  Alert,
-} from 'react-native';
-import { router } from 'expo-router';
-import { ThemedView } from '@/components/ThemedView';
-import { ThemedText } from '@/components/ThemedText';
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
 
 export default function RegistrationPage() {
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState("");
+  const [errorText, setErrorText] = useState("");
+  const inputRef = useRef<any>(null);
 
   const handleRegistration = () => {
     if (username.trim().length === 0) {
-      Alert.alert('Error', 'Please enter a username');
+      setErrorText("Please enter a username");
       return;
     }
-    
+
     // Here you would typically save the username to storage/state
     // For now, just navigate to the home page
-    router.replace('/(tabs)');
+    router.replace("/(tabs)");
   };
 
+  useEffect(() => {
+    if (errorText) {
+      setTimeout(() => {
+        setErrorText("");
+      }, 3000);
+    }
+  }, [errorText]);
+
   return (
-    <ThemedView style={styles.container}>
-      <View style={styles.content}>
-        <ThemedText type="defaultSemiBold" style={styles.title}>
-          Welcome to NFC Scavenger Hunt
-        </ThemedText>
-        
-        <ThemedText type="default" style={styles.subtitle}>
-          Enter your username to get started
-        </ThemedText>
+    <TouchableWithoutFeedback onPress={() => inputRef.current?.blur()}>
+      <View className="flex-1 px-5">
+        {/* Centered content */}
+        <View className="flex-1 justify-center items-center">
+          <Image
+            source={Logo}
+            className="size-20 float-start translate-y-[-100px]"
+          />
+          <Text variant="h1" className="text-gray-800 font-semibold mb-10">
+            Join Bits&apos; Hunt!
+          </Text>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Enter username"
-          placeholderTextColor="#666"
-          value={username}
-          onChangeText={setUsername}
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
+          <Input
+            ref={inputRef}
+            className={cn(
+              "border-2 border-gray-300 rounded-md p-3 w-full h-12",
+              errorText && "border-destructive border-2"
+            )}
+            placeholder="Enter username"
+            value={username}
+            onChangeText={setUsername}
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+        </View>
 
+        {/* Button at bottom */}
         <TouchableOpacity
-          style={styles.button}
+          className="bg-primary rounded-md p-3 w-full items-center justify-center mb-8"
           onPress={handleRegistration}
         >
-          <Text style={styles.buttonText}>Start Adventure</Text>
+          <Text className="text-white font-semibold">Start the Hunt!</Text>
         </TouchableOpacity>
       </View>
-    </ThemedView>
+    </TouchableWithoutFeedback>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  title: {
-    fontSize: 28,
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: 16,
-    marginBottom: 32,
-    textAlign: 'center',
-    opacity: 0.7,
-  },
-  input: {
-    width: '100%',
-    height: 50,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    fontSize: 16,
-    marginBottom: 24,
-    backgroundColor: '#fff',
-  },
-  button: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    borderRadius: 8,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
-  },
-});
