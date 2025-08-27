@@ -4,11 +4,8 @@
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    total_points INTEGER DEFAULT 0,
-    current_clue_id VARCHAR(50) DEFAULT NULL
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Create clues table
@@ -19,7 +16,6 @@ CREATE TABLE IF NOT EXISTS clues (
     is_copyable BOOLEAN DEFAULT true,
     image_url TEXT,
     location VARCHAR(255),
-    points INTEGER DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     order_index INTEGER DEFAULT 0
@@ -31,7 +27,6 @@ CREATE TABLE IF NOT EXISTS user_progress (
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     clue_id VARCHAR(50) REFERENCES clues(id) ON DELETE CASCADE,
     completed_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    points_earned INTEGER DEFAULT 0,
     UNIQUE(user_id, clue_id)
 );
 
@@ -44,7 +39,6 @@ ON CONFLICT (id) DO NOTHING;
 
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
-CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_user_progress_user_id ON user_progress(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_progress_clue_id ON user_progress(clue_id);
 CREATE INDEX IF NOT EXISTS idx_clues_order_index ON clues(order_index);

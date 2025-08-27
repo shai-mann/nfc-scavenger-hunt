@@ -34,39 +34,3 @@ Backend server for the NFC Scavenger Hunt mobile application.
    # Production mode
    npm start
    ```
-
-## API Endpoints
-
-### Health Check
-
-- **GET** `/health` - Server status and information
-
-### Clues
-
-- **GET** `/api/clues/:clueId` - Get a specific clue by ID
-
-### Root
-
-- **GET** `/` - API information and available endpoints
-
-## Sample Data
-
-The server includes mock data for testing:
-
-- `clue-1`: The Hidden Library
-- `clue-2`: Secret Garden Path
-- `clue-3`: The Clock Tower Mystery
-
-## Development
-
-- **Port**: 3000 (configurable via PORT environment variable)
-- **Auto-reload**: Uses nodemon for development
-- **CORS**: Enabled for all origins (configure as needed for production)
-
-## Future Enhancements
-
-- Database integration
-- User authentication
-- Real-time updates
-- Image upload handling
-- Leaderboard system
