@@ -21,6 +21,54 @@ app.get("/health", (req, res) => {
   });
 });
 
+/* USER ENDPOINTS */
+
+// User registration endpoint (username only)
+app.post("/api/register", async (req, res) => {
+  const { username } = req.body;
+
+  if (!username) {
+    return res.status(400).json({
+      error: "Missing required fields",
+      message: "Username is required",
+    });
+  }
+
+  if (username.length < 3 || username.length > 50) {
+    return res.status(400).json({
+      error: "Invalid username",
+      message: "Username must be between 3 and 50 characters",
+    });
+  }
+
+  try {
+    const result = await query(
+      "INSERT INTO users (username) VALUES ($1) RETURNING id, username, created_at",
+      [username]
+    );
+
+    res.status(201).json({
+      success: true,
+      data: result.rows[0],
+    });
+  } catch (error) {
+    console.error("Database error:", error);
+    if (error.code === "23505") {
+      // Unique violation
+      return res.status(409).json({
+        error: "Username taken",
+        message: "This username is already registered",
+      });
+    }
+    res.status(500).json({
+      error: "Database error",
+      message: "Failed to register user",
+    });
+  }
+});
+
+/* CLUE ENDPOINTS */
+
 // Get clue endpoint (requires unlock verification)
 app.get("/api/clues/:clueId", async (req, res) => {
   const { clueId } = req.params;
@@ -113,15 +161,7 @@ app.get("/api/clues", async (req, res) => {
     // Get all clues the user has unlocked
     const result = await query(
       `
-      SELECT 
-        c.id, 
-        c.title, 
-        c.text, 
-        c.is_copyable as "isCopyable", 
-        c.image_url as image, 
-        c.location,
-        c.order_index,
-        up.completed_at as "unlockedAt"
+      SELECT c.title, c.order_index
       FROM clues c
       INNER JOIN user_progress up ON c.id = up.clue_id
       WHERE up.user_id = $1
@@ -139,50 +179,6 @@ app.get("/api/clues", async (req, res) => {
     res.status(500).json({
       error: "Database error",
       message: "Failed to retrieve clues",
-    });
-  }
-});
-
-// User registration endpoint (username only)
-app.post("/api/register", async (req, res) => {
-  const { username } = req.body;
-
-  if (!username) {
-    return res.status(400).json({
-      error: "Missing required fields",
-      message: "Username is required",
-    });
-  }
-
-  if (username.length < 3 || username.length > 50) {
-    return res.status(400).json({
-      error: "Invalid username",
-      message: "Username must be between 3 and 50 characters",
-    });
-  }
-
-  try {
-    const result = await query(
-      "INSERT INTO users (username) VALUES ($1) RETURNING id, username, created_at",
-      [username]
-    );
-
-    res.status(201).json({
-      success: true,
-      data: result.rows[0],
-    });
-  } catch (error) {
-    console.error("Database error:", error);
-    if (error.code === "23505") {
-      // Unique violation
-      return res.status(409).json({
-        error: "Username taken",
-        message: "This username is already registered",
-      });
-    }
-    res.status(500).json({
-      error: "Database error",
-      message: "Failed to register user",
     });
   }
 });

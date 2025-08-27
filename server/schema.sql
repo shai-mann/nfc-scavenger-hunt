@@ -18,7 +18,6 @@ CREATE TABLE IF NOT EXISTS clues (
     text TEXT NOT NULL,
     is_copyable BOOLEAN DEFAULT true,
     image_url TEXT,
-    location VARCHAR(255),
     password VARCHAR(255) NOT NULL,
     lock_state lock_state_enum DEFAULT 'none',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
