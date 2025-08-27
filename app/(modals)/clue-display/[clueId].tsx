@@ -1,4 +1,3 @@
-import { ThemedView } from "@/components/ThemedView";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { Text } from "@/components/ui/text";
 import Clipboard from "@react-native-clipboard/clipboard";
@@ -9,7 +8,6 @@ import {
   Image,
   Pressable,
   ScrollView,
-  StyleSheet,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -107,35 +105,37 @@ export default function ClueDisplayModal() {
   });
 
   return (
-    <ThemedView style={styles.container}>
-      <View style={styles.header}>
-        <Text variant="h3" style={styles.title}>
+    <View className="flex-1 pt-15 bg-background">
+      <View className="flex-row justify-between items-center px-5 pb-5 border-b border-border">
+        <Text variant="h3" className="flex-1 mr-5 text-2xl">
           {clue.title}
         </Text>
-        <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
+        <TouchableOpacity onPress={handleClose} className="p-2">
           <IconSymbol size={24} name="xmark" color="#666" />
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
         {/* Clue ID Display */}
-        <View style={styles.clueIdContainer}>
-          <Text variant="default" style={styles.clueId}>
+        <View className="bg-muted p-3 rounded-lg mb-6">
+          <Text variant="default" className="text-sm opacity-70 text-center">
             Clue ID: {clue.id}
           </Text>
         </View>
 
         {/* Clue Text */}
         {clue.text && (
-          <View style={styles.textContainer}>
-            <View style={styles.textHeader}>
-              <Text variant="h4" style={styles.sectionTitle}>
+          <View className="mb-6">
+            <View className="flex-row justify-between items-center mb-3">
+              <Text variant="h4" className="text-lg font-semibold">
                 Clue Text
               </Text>
               {clue.isCopyable && (
                 <TouchableOpacity
                   onPress={handleCopyText}
-                  style={[styles.copyButton, copied && styles.copyButtonCopied]}
+                  className={`flex-row items-center px-3 py-1.5 rounded-2xl gap-1.5 ${
+                    copied ? "bg-green-50" : "bg-blue-50"
+                  }`}
                 >
                   <IconSymbol
                     size={16}
@@ -144,10 +144,9 @@ export default function ClueDisplayModal() {
                   />
                   <Text
                     variant="default"
-                    style={[
-                      styles.copyButtonText,
-                      copied && styles.copyButtonTextCopied,
-                    ]}
+                    className={`text-sm ${
+                      copied ? "text-green-600" : "text-blue-600"
+                    }`}
                   >
                     {copied ? "Copied!" : "Copy"}
                   </Text>
@@ -156,18 +155,19 @@ export default function ClueDisplayModal() {
             </View>
 
             <View
-              style={[
-                styles.textBlock,
-                clue.isCopyable && styles.copyableTextBlock,
-              ]}
+              className={`p-4 rounded-xl border-l-4 ${
+                clue.isCopyable
+                  ? "bg-blue-50 border-l-blue-500"
+                  : "bg-muted border-l-border"
+              }`}
             >
-              <Text variant="default" style={styles.clueText}>
+              <Text variant="default" className="text-base leading-6 mb-2">
                 {clue.text}
               </Text>
               {clue.isCopyable && (
-                <View style={styles.copyableIndicator}>
+                <View className="flex-row items-center gap-1">
                   <IconSymbol size={12} name="doc.on.doc" color="#007AFF" />
-                  <Text variant="default" style={styles.copyableText}>
+                  <Text variant="default" className="text-xs text-blue-600">
                     Copyable
                   </Text>
                 </View>
@@ -178,14 +178,14 @@ export default function ClueDisplayModal() {
 
         {/* Clue Image */}
         {clue.image && (
-          <View style={styles.imageContainer}>
-            <Text variant="h4" style={styles.sectionTitle}>
+          <View className="mb-6">
+            <Text variant="h4" className="text-lg font-semibold mb-3">
               Clue Image
             </Text>
-            <View style={styles.imageWrapper}>
+            <View className="rounded-xl overflow-hidden bg-muted">
               <Image
                 source={{ uri: clue.image }}
-                style={styles.clueImage}
+                className="w-full h-50"
                 resizeMode="cover"
                 // Fallback for when image fails to load
                 onError={() => {
@@ -201,6 +201,7 @@ export default function ClueDisplayModal() {
           onPress={handleClose}
           onPressIn={() => (scale.value = withSpring(0.95))}
           onPressOut={() => (scale.value = withSpring(1))}
+          className="mt-5"
         >
           <Animated.View
             className="bg-primary rounded-md p-3 w-full items-center justify-center"
@@ -212,133 +213,6 @@ export default function ClueDisplayModal() {
           </Animated.View>
         </Pressable>
       </ScrollView>
-    </ThemedView>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: 60,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
-  },
-  title: {
-    fontSize: 24,
-    flex: 1,
-    marginRight: 20,
-  },
-  closeButton: {
-    padding: 8,
-  },
-  content: {
-    flex: 1,
-    padding: 20,
-  },
-  clueIdContainer: {
-    backgroundColor: "#f0f0f0",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 24,
-  },
-  clueId: {
-    fontSize: 14,
-    opacity: 0.7,
-    textAlign: "center",
-  },
-  textContainer: {
-    marginBottom: 24,
-  },
-  textHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  sectionTitle: {
-    fontSize: 18,
-  },
-  copyButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#f0f8ff",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    gap: 6,
-  },
-  copyButtonCopied: {
-    backgroundColor: "#f0fff0",
-  },
-  copyButtonText: {
-    fontSize: 14,
-    color: "#007AFF",
-  },
-  copyButtonTextCopied: {
-    color: "#34C759",
-  },
-  textBlock: {
-    backgroundColor: "#f8f9fa",
-    padding: 16,
-    borderRadius: 12,
-    borderLeftWidth: 4,
-    borderLeftColor: "#e0e0e0",
-  },
-  copyableTextBlock: {
-    borderLeftColor: "#007AFF",
-    backgroundColor: "#f0f8ff",
-  },
-  clueText: {
-    fontSize: 16,
-    lineHeight: 24,
-    marginBottom: 8,
-  },
-  copyableIndicator: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  copyableText: {
-    fontSize: 12,
-    color: "#007AFF",
-  },
-  imageContainer: {
-    marginBottom: 24,
-  },
-  imageWrapper: {
-    borderRadius: 12,
-    overflow: "hidden",
-    backgroundColor: "#f0f0f0",
-  },
-  clueImage: {
-    width: "100%",
-    height: 200,
-  },
-  actionContainer: {
-    flexDirection: "row",
-    gap: 12,
-    marginTop: 20,
-  },
-  actionButton: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#f8f9fa",
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    gap: 8,
-  },
-  actionButtonText: {
-    fontSize: 14,
-    color: "#333",
-  },
-});
