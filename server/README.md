@@ -28,7 +28,7 @@ Backend server for the NFC Scavenger Hunt mobile application.
 2.5 **Install Docker**
 
 ```bash
-brew install --cask docker
+brew install --cask docker && brew install docker-compose
 ```
 
 3. **Start the database**

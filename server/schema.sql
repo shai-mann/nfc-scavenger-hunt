@@ -8,6 +8,9 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Create lock state enum
+CREATE TYPE lock_state_enum AS ENUM ('none', 'requires_previous');
+
 -- Create clues table
 CREATE TABLE IF NOT EXISTS clues (
     id VARCHAR(50) PRIMARY KEY,
@@ -16,6 +19,8 @@ CREATE TABLE IF NOT EXISTS clues (
     is_copyable BOOLEAN DEFAULT true,
     image_url TEXT,
     location VARCHAR(255),
+    password VARCHAR(255) NOT NULL,
+    lock_state lock_state_enum DEFAULT 'none',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     order_index INTEGER DEFAULT 0
@@ -31,10 +36,10 @@ CREATE TABLE IF NOT EXISTS user_progress (
 );
 
 -- Insert sample clues
-INSERT INTO clues (id, title, text, is_copyable, image_url, location, points, order_index) VALUES
-('clue-1', 'The Hidden Library', 'Find the ancient tome hidden behind the third pillar from the entrance. The answer lies within its weathered pages.', true, null, 'Main Library', 100, 1),
-('clue-2', 'Secret Garden Path', 'Follow the stone path that winds through the rose garden. Count the steps and remember the number.', false, null, 'Botanical Gardens', 150, 2),
-('clue-3', 'The Clock Tower Mystery', 'At exactly 3:15 PM, the shadow of the clock tower points to a hidden marker. What do you see?', true, 'https://example.com/clock-tower.jpg', 'Clock Tower Plaza', 200, 3)
+INSERT INTO clues (id, title, text, is_copyable, image_url, location, password, lock_state, order_index) VALUES
+('clue-1', 'The Hidden Library', 'Find the ancient tome hidden behind the third pillar from the entrance. The answer lies within its weathered pages.', true, null, 'Main Library', 'ancient_wisdom', 'none', 1),
+('clue-2', 'Secret Garden Path', 'Follow the stone path that winds through the rose garden. Count the steps and remember the number.', false, null, 'Botanical Gardens', 'rose_steps', 'requires_previous', 2),
+('clue-3', 'The Clock Tower Mystery', 'At exactly 3:15 PM, the shadow of the clock tower points to a hidden marker. What do you see?', true, 'https://example.com/clock-tower.jpg', 'Clock Tower Plaza', 'shadow_marker', 'requires_previous', 3)
 ON CONFLICT (id) DO NOTHING;
 
 -- Create indexes for better performance
