@@ -25,7 +25,19 @@ Backend server for the NFC Scavenger Hunt mobile application.
    # Edit .env with your configuration
    ```
 
-3. **Start the server:**
+2.5 **Install Docker**
+
+```bash
+brew install --cask docker
+```
+
+3. **Start the database**
+
+   ```bash
+   cd server && docker-compose up -d
+   ```
+
+4. **Start the server:**
 
    ```bash
    # Development mode (with auto-reload)
