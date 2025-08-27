@@ -1,4 +1,4 @@
-const { Pool } = require('pg');
+const { Pool } = require("pg");
 
 const pool = new Pool({
   user: process.env.DB_USER,
@@ -11,8 +11,8 @@ const pool = new Pool({
   connectionTimeoutMillis: 2000,
 });
 
-pool.on('error', (err) => {
-  console.error('Unexpected error on idle client', err);
+pool.on("error", (err) => {
+  console.error("Unexpected error on idle client", err);
   process.exit(-1);
 });
 
@@ -33,12 +33,12 @@ async function getClient() {
 
 async function testConnection() {
   try {
-    const result = await query('SELECT NOW()');
-    console.log('✅ Database connected successfully');
-    console.log('📅 Server time:', result.rows[0].now);
+    const result = await query("SELECT NOW()");
+    console.log("Database connected successfully");
+    console.log("Server time:", result.rows[0].now);
     return true;
   } catch (err) {
-    console.error('❌ Database connection failed:', err.message);
+    console.error("Database connection failed:", err.message);
     return false;
   }
 }
@@ -47,5 +47,5 @@ module.exports = {
   query,
   getClient,
   pool,
-  testConnection
+  testConnection,
 };

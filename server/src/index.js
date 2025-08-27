@@ -289,23 +289,6 @@ app.post("/api/clues/:clueId/unlock", async (req, res) => {
   }
 });
 
-// Root endpoint
-app.get("/", (req, res) => {
-  res.json({
-    message: "Welcome to NFC Scavenger Hunt Server",
-    endpoints: {
-      health: "/health",
-      register: "POST /api/register - Register with username",
-      users: "GET /api/users/:userId - Get user info",
-      clues: "GET /api/clues?userId=:userId - Get unlocked clues",
-      clueDetails:
-        "GET /api/clues/:clueId?userId=:userId - Get specific clue if unlocked",
-      unlock: "POST /api/clues/:clueId/unlock - Unlock clue with password",
-      root: "/",
-    },
-  });
-});
-
 // 404 handler
 app.use("*", (req, res) => {
   res.status(404).json({
@@ -325,9 +308,9 @@ app.use((err, req, res, next) => {
 
 // Start server
 app.listen(PORT, async () => {
-  console.log(`🚀 NFC Scavenger Hunt Server running on port ${PORT}`);
-  console.log(`📍 Health check: http://localhost:${PORT}/health`);
-  console.log(`🔍 Sample clue: http://localhost:${PORT}/api/clues/clue-1`);
+  console.log(`NFC Scavenger Hunt Server running on port ${PORT}`);
+  console.log(`Health check: http://localhost:${PORT}/health`);
+  console.log(`Sample clue: http://localhost:${PORT}/api/clues/clue-1`);
 
   // Test database connection
   await testConnection();
