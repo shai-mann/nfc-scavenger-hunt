@@ -14,7 +14,7 @@
     "node",
     "express"
   ],
-  "author": "",
+  "author": "Shai Mann-Robison",
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",
