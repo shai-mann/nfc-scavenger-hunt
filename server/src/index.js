@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
+const { query, testConnection } = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -20,54 +21,120 @@ app.get("/health", (req, res) => {
   });
 });
 
-// Sample clue endpoint
-app.get("/api/clues/:clueId", (req, res) => {
+// Get clue endpoint
+app.get("/api/clues/:clueId", async (req, res) => {
   const { clueId } = req.params;
 
-  // Mock data - in a real app, this would come from a database
-  const mockClues = {
-    "clue-1": {
-      id: "clue-1",
-      title: "The Hidden Library",
-      text: "Find the ancient tome hidden behind the third pillar from the entrance. The answer lies within its weathered pages.",
-      isCopyable: true,
-      image: null,
-      location: "Main Library",
-      points: 100,
-    },
-    "clue-2": {
-      id: "clue-2",
-      title: "Secret Garden Path",
-      text: "Follow the stone path that winds through the rose garden. Count the steps and remember the number.",
-      isCopyable: false,
-      image: null,
-      location: "Botanical Gardens",
-      points: 150,
-    },
-    "clue-3": {
-      id: "clue-3",
-      title: "The Clock Tower Mystery",
-      text: "At exactly 3:15 PM, the shadow of the clock tower points to a hidden marker. What do you see?",
-      isCopyable: true,
-      image: "https://example.com/clock-tower.jpg",
-      location: "Clock Tower Plaza",
-      points: 200,
-    },
-  };
+  try {
+    const result = await query(
+      'SELECT id, title, text, is_copyable as "isCopyable", image_url as image, location, points FROM clues WHERE id = $1',
+      [clueId]
+    );
 
-  const clue = mockClues[clueId];
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        error: "Clue not found",
+        message: `No clue found with ID: ${clueId}`,
+      });
+    }
 
-  if (!clue) {
-    return res.status(404).json({
-      error: "Clue not found",
-      message: `No clue found with ID: ${clueId}`,
+    res.json({
+      success: true,
+      data: result.rows[0],
+    });
+  } catch (error) {
+    console.error('Database error:', error);
+    res.status(500).json({
+      error: "Database error",
+      message: "Failed to retrieve clue",
+    });
+  }
+});
+
+// Get all clues endpoint
+app.get("/api/clues", async (req, res) => {
+  try {
+    const result = await query(
+      'SELECT id, title, text, is_copyable as "isCopyable", image_url as image, location, points, order_index FROM clues ORDER BY order_index'
+    );
+
+    res.json({
+      success: true,
+      data: result.rows,
+    });
+  } catch (error) {
+    console.error('Database error:', error);
+    res.status(500).json({
+      error: "Database error",
+      message: "Failed to retrieve clues",
+    });
+  }
+});
+
+// Create user endpoint
+app.post("/api/users", async (req, res) => {
+  const { username, email } = req.body;
+
+  if (!username || !email) {
+    return res.status(400).json({
+      error: "Missing required fields",
+      message: "Username and email are required",
     });
   }
 
-  res.json({
-    success: true,
-    data: clue,
-  });
+  try {
+    const result = await query(
+      'INSERT INTO users (username, email) VALUES ($1, $2) RETURNING id, username, email, created_at, total_points',
+      [username, email]
+    );
+
+    res.status(201).json({
+      success: true,
+      data: result.rows[0],
+    });
+  } catch (error) {
+    console.error('Database error:', error);
+    if (error.code === '23505') { // Unique violation
+      return res.status(409).json({
+        error: "User already exists",
+        message: "Username or email already taken",
+      });
+    }
+    res.status(500).json({
+      error: "Database error",
+      message: "Failed to create user",
+    });
+  }
+});
+
+// Get user endpoint
+app.get("/api/users/:userId", async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const result = await query(
+      'SELECT id, username, email, created_at, total_points, current_clue_id FROM users WHERE id = $1',
+      [userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        error: "User not found",
+        message: `No user found with ID: ${userId}`,
+      });
+    }
+
+    res.json({
+      success: true,
+      data: result.rows[0],
+    });
+  } catch (error) {
+    console.error('Database error:', error);
+    res.status(500).json({
+      error: "Database error",
+      message: "Failed to retrieve user",
+    });
+  }
 });
 
 // Root endpoint
@@ -76,7 +143,8 @@ app.get("/", (req, res) => {
     message: "Welcome to NFC Scavenger Hunt Server",
     endpoints: {
       health: "/health",
-      clues: "/api/clues/:clueId",
+      clues: "/api/clues (GET all) or /api/clues/:clueId (GET one)",
+      users: "/api/users (POST to create) or /api/users/:userId (GET one)",
       root: "/",
     },
   });
@@ -100,8 +168,11 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`🚀 NFC Scavenger Hunt Server running on port ${PORT}`);
   console.log(`📍 Health check: http://localhost:${PORT}/health`);
   console.log(`🔍 Sample clue: http://localhost:${PORT}/api/clues/clue-1`);
+  
+  // Test database connection
+  await testConnection();
 });
