@@ -1,16 +1,23 @@
-import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { IconSymbol } from "@/components/ui/IconSymbol";
+import { Text } from "@/components/ui/text";
+import Clipboard from "@react-native-clipboard/clipboard";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useLayoutEffect, useState } from "react";
 import {
   Alert,
   Image,
+  Pressable,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
   View,
 } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from "react-native-reanimated";
 
 // Temporary clue data structure - in a real app, this would come from an API or database
 const TEMP_CLUES = {
@@ -55,6 +62,9 @@ export default function ClueDisplayModal() {
       router.replace("/registration");
     } else if (!IS_CLUE_UNLOCKED) {
       // if registered but the clue is not unlocked yet, redirect to home
+      // the clue would be unlocked in the clue-finding modal, so it cannot be displayed here
+      // if it is not unlocked.
+      // TODO: make this checked against the server
       router.replace("/(tabs)");
     }
   }, []);
@@ -74,12 +84,7 @@ export default function ClueDisplayModal() {
   const handleCopyText = async () => {
     if (clue.isCopyable && clue.text) {
       try {
-        // In a real app, you'd use a clipboard library like @react-native-clipboard/clipboard
-        // For now, we'll just show an alert
-        Alert.alert(
-          "Text Copied!",
-          "The clue text has been copied to your clipboard."
-        );
+        Clipboard.setString(clue.text);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       } catch (error) {
@@ -92,12 +97,21 @@ export default function ClueDisplayModal() {
     router.back();
   };
 
+  const scale = useSharedValue(1);
+
+  // Animated style that updates on UI thread
+  const animatedButtonStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: scale.value }],
+    };
+  });
+
   return (
     <ThemedView style={styles.container}>
       <View style={styles.header}>
-        <ThemedText type="defaultSemiBold" style={styles.title}>
+        <Text variant="h3" style={styles.title}>
           {clue.title}
-        </ThemedText>
+        </Text>
         <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
           <IconSymbol size={24} name="xmark" color="#666" />
         </TouchableOpacity>
@@ -106,18 +120,18 @@ export default function ClueDisplayModal() {
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Clue ID Display */}
         <View style={styles.clueIdContainer}>
-          <ThemedText type="default" style={styles.clueId}>
+          <Text variant="default" style={styles.clueId}>
             Clue ID: {clue.id}
-          </ThemedText>
+          </Text>
         </View>
 
         {/* Clue Text */}
         {clue.text && (
           <View style={styles.textContainer}>
             <View style={styles.textHeader}>
-              <ThemedText type="defaultSemiBold" style={styles.sectionTitle}>
+              <Text variant="h4" style={styles.sectionTitle}>
                 Clue Text
-              </ThemedText>
+              </Text>
               {clue.isCopyable && (
                 <TouchableOpacity
                   onPress={handleCopyText}
@@ -128,15 +142,15 @@ export default function ClueDisplayModal() {
                     name={copied ? "checkmark" : "doc.on.doc"}
                     color={copied ? "#34C759" : "#007AFF"}
                   />
-                  <ThemedText
-                    type="default"
+                  <Text
+                    variant="default"
                     style={[
                       styles.copyButtonText,
                       copied && styles.copyButtonTextCopied,
                     ]}
                   >
                     {copied ? "Copied!" : "Copy"}
-                  </ThemedText>
+                  </Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -147,15 +161,15 @@ export default function ClueDisplayModal() {
                 clue.isCopyable && styles.copyableTextBlock,
               ]}
             >
-              <ThemedText type="default" style={styles.clueText}>
+              <Text variant="default" style={styles.clueText}>
                 {clue.text}
-              </ThemedText>
+              </Text>
               {clue.isCopyable && (
                 <View style={styles.copyableIndicator}>
                   <IconSymbol size={12} name="doc.on.doc" color="#007AFF" />
-                  <ThemedText type="default" style={styles.copyableText}>
+                  <Text variant="default" style={styles.copyableText}>
                     Copyable
-                  </ThemedText>
+                  </Text>
                 </View>
               )}
             </View>
@@ -165,9 +179,9 @@ export default function ClueDisplayModal() {
         {/* Clue Image */}
         {clue.image && (
           <View style={styles.imageContainer}>
-            <ThemedText type="defaultSemiBold" style={styles.sectionTitle}>
+            <Text variant="h4" style={styles.sectionTitle}>
               Clue Image
-            </ThemedText>
+            </Text>
             <View style={styles.imageWrapper}>
               <Image
                 source={{ uri: clue.image }}
@@ -182,22 +196,21 @@ export default function ClueDisplayModal() {
           </View>
         )}
 
-        {/* Action Buttons */}
-        <View style={styles.actionContainer}>
-          <TouchableOpacity style={styles.actionButton}>
-            <IconSymbol size={20} name="flag" color="#007AFF" />
-            <ThemedText type="default" style={styles.actionButtonText}>
-              Mark as Found
-            </ThemedText>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.actionButton}>
-            <IconSymbol size={20} name="star" color="#FF9500" />
-            <ThemedText type="default" style={styles.actionButtonText}>
-              Add to Favorites
-            </ThemedText>
-          </TouchableOpacity>
-        </View>
+        {/* Action to close modal */}
+        <Pressable
+          onPress={handleClose}
+          onPressIn={() => (scale.value = withSpring(0.95))}
+          onPressOut={() => (scale.value = withSpring(1))}
+        >
+          <Animated.View
+            className="bg-primary rounded-md p-3 w-full items-center justify-center"
+            style={animatedButtonStyle}
+          >
+            <Text className="text-white font-semibold">
+              Find the next Bits!
+            </Text>
+          </Animated.View>
+        </Pressable>
       </ScrollView>
     </ThemedView>
   );
