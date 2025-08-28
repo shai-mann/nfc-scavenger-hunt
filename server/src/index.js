@@ -52,13 +52,15 @@ app.post("/api/register", async (req, res) => {
       data: result.rows[0],
     });
   } catch (error) {
-    console.error("Database error:", error);
     if (error.code === "23505") {
       // Unique violation
       return res.status(409).json({
         error: "Username taken",
         message: "This username is already registered",
       });
+    } else {
+      // ignore unique violation errors so console isn't spammed
+      console.error("Database error:", error);
     }
     res.status(500).json({
       error: "Database error",
