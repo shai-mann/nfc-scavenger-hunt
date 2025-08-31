@@ -1,6 +1,7 @@
 import { Clue } from "@/app/(tabs)";
 import { generateSinePath } from "@/lib/generate-sine-path";
 import { cn } from "@/lib/utils";
+import { router } from "expo-router";
 import { useMemo, useState } from "react";
 import { Dimensions, Pressable, ScrollView, View } from "react-native";
 import Animated, {
@@ -120,7 +121,7 @@ const ClueComponent = ({ item, index }: { item: Clue; index: number }) => {
     >
       <Pressable
         disabled={!item.isFound}
-        onPress={() => console.log("pressed clue", item.id)}
+        onPress={() => router.push(`/clue-display/${item.id}`)}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
       >
