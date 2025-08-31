@@ -185,7 +185,7 @@ export default function ClueDisplayModal() {
         </View>
       </ScrollView>
       {/* Action to close modal */}
-      <View className="px-5 border-t border-border mt-auto">
+      <View className="px-5 border-t border-border mt-auto pb-3">
         <Pressable
           onPress={handleClose}
           onPressIn={() => (scale.value = withSpring(0.95))}
