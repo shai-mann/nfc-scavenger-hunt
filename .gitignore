@@ -9,6 +9,10 @@ dist/
 web-build/
 expo-env.d.ts
 
+# Generated native code
+/ios
+/android
+
 # Native
 .kotlin/
 *.orig.*
