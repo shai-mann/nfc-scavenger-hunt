@@ -14,8 +14,8 @@ src/
 ├── middleware/      # Authentication and error handling
 ├── routes/          # Route definitions
 ├── utils/           # Utility functions and custom errors
-├── db.js           # Database connection
-└── index.js        # Main application entry point
+├── db.ts           # Database connection
+└── index.ts        # Main application entry point
 ```
 
 ## Features
@@ -70,6 +70,7 @@ brew install --cask docker && brew install docker-compose
 ### Authentication
 
 The server uses a simple user ID-based authentication system. User ID can be passed:
+
 - **GET requests**: As query parameter `?userId=123`
 - **POST requests**: In request body `{"userId": 123}`
 
@@ -91,18 +92,21 @@ The server uses a simple user ID-based authentication system. User ID can be pas
 ## Database Models
 
 ### User Model
+
 - `User.findById(id)` - Find user by ID
 - `User.findByUsername(username)` - Find user by username
 - `User.create(username)` - Create new user
 - `User.exists(id)` - Check if user exists
 
 ### Clue Model
+
 - `Clue.findById(id)` - Find clue by ID
 - `Clue.findAll()` - Get all clues
 - `Clue.findPreviousClues(orderIndex)` - Get clues before given order
 - `clue.verifyPassword(password)` - Verify clue password
 
 ### UserProgress Model
+
 - `UserProgress.findByUserAndClue(userId, clueId)` - Check unlock status
 - `UserProgress.getUserUnlockedClues(userId)` - Get user's unlocked clues
 - `UserProgress.hasUserUnlockedClue(userId, clueId)` - Check if unlocked
@@ -111,22 +115,26 @@ The server uses a simple user ID-based authentication system. User ID can be pas
 ## Services
 
 ### UserService
+
 - Handles user registration and validation
 - Validates username requirements
 - Manages user authentication
 
-### ClueService  
+### ClueService
+
 - Manages clue retrieval and unlocking
 - Enforces lock state requirements
 - Validates passwords and prerequisites
 
 ## Middleware
 
-### Authentication (`/middleware/auth.js`)
+### Authentication (`/middleware/auth.ts`)
+
 - `requireAuth` - Validates user ID and ensures user exists
 - `optionalAuth` - Non-failing auth for optional authentication
 
-### Error Handler (`/middleware/errorHandler.js`)
+### Error Handler (`/middleware/errorHandler.ts`)
+
 - Handles custom application errors
 - Database constraint violations
 - Generic server errors

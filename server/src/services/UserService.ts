@@ -1,16 +1,10 @@
 import User from "../models/User";
-import { ConflictError, NotFoundError, ValidationError } from "../utils/errors";
+import { CreateUserRequest } from "../types/api";
+import { ConflictError, NotFoundError } from "../utils/errors";
 
 class UserService {
-  static async registerUser(username) {
-    // Validate input
-    if (!username) {
-      throw new ValidationError("Username is required");
-    }
-
-    if (username.length < 3 || username.length > 50) {
-      throw new ValidationError("Username must be between 3 and 50 characters");
-    }
+  static async registerUser(userData: CreateUserRequest): Promise<User> {
+    const { username } = userData;
 
     // Check if username already exists
     const existingUser = await User.findByUsername(username);
@@ -22,7 +16,7 @@ class UserService {
     return await User.create(username);
   }
 
-  static async getUserById(userId) {
+  static async getUserById(userId: string): Promise<User> {
     const user = await User.findById(userId);
     if (!user) {
       throw new NotFoundError("User not found");
@@ -30,7 +24,7 @@ class UserService {
     return user;
   }
 
-  static async validateUserExists(userId) {
+  static async validateUserExists(userId: string): Promise<boolean> {
     const exists = await User.exists(userId);
     if (!exists) {
       throw new NotFoundError("User not found");
