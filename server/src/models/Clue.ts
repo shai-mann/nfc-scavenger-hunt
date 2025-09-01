@@ -1,7 +1,7 @@
-import { query } from '../db';
-import { ClueRow, CluePublic, LockState } from '../types/database';
+import { query } from "../db";
+import { CluePublic, ClueRow, LockState } from "../types/database";
 
-export class Clue {
+class Clue {
   public id: string;
   public title: string;
   public data: any;
@@ -23,25 +23,30 @@ export class Clue {
   }
 
   static async findById(id: string): Promise<Clue | null> {
-    const result = await query<ClueRow>('SELECT * FROM clues WHERE id = $1', [id]);
+    const result = await query<ClueRow>("SELECT * FROM clues WHERE id = $1", [
+      id,
+    ]);
     return result.rows.length > 0 ? new Clue(result.rows[0]!) : null;
   }
 
-  static async findAll(orderBy: string = 'order_index'): Promise<Clue[]> {
-    const result = await query<ClueRow>(`SELECT * FROM clues ORDER BY ${orderBy}`);
+  static async findAll(orderBy: string = "order_index"): Promise<Clue[]> {
+    const result = await query<ClueRow>(
+      `SELECT * FROM clues ORDER BY ${orderBy}`
+    );
     return result.rows.map((row) => new Clue(row));
   }
 
   static async findByOrderIndex(orderIndex: number): Promise<Clue | null> {
-    const result = await query<ClueRow>('SELECT * FROM clues WHERE order_index = $1', [
-      orderIndex,
-    ]);
+    const result = await query<ClueRow>(
+      "SELECT * FROM clues WHERE order_index = $1",
+      [orderIndex]
+    );
     return result.rows.length > 0 ? new Clue(result.rows[0]!) : null;
   }
 
   static async findPreviousClues(orderIndex: number): Promise<Clue[]> {
     const result = await query<ClueRow>(
-      'SELECT * FROM clues WHERE order_index < $1 ORDER BY order_index',
+      "SELECT * FROM clues WHERE order_index < $1 ORDER BY order_index",
       [orderIndex]
     );
     return result.rows.map((row) => new Clue(row));

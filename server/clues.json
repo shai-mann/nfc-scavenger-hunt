@@ -1,0 +1,30 @@
+[
+  {
+    "title": "The Hidden Library",
+    "data": {
+      "text": "Example Text for the first clue",
+      "isCopyable": true
+    },
+    "password": "teeheepassword",
+    "order_index": 1
+  },
+  {
+    "title": "Secret Garden Path",
+    "data": {
+      "text": "Example Text for the second clue",
+      "isCopyable": false
+    },
+    "password": "adifferentpassword",
+    "order_index": 2
+  },
+  {
+    "title": "The Clock Tower Mystery",
+    "data": {
+      "text": "Example Text for the third clue",
+      "isCopyable": true
+    },
+    "password": "anotherpassword",
+    "lock_state": "requires_previous",
+    "order_index": 3
+  }
+]

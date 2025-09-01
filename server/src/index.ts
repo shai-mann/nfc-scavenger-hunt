@@ -51,7 +51,6 @@ app.use(errorHandler);
 app.listen(PORT, async () => {
   console.log(`NFC Scavenger Hunt Server running on port ${PORT}`);
   console.log(`Health check: http://localhost:${PORT}/health`);
-  console.log(`API documentation: http://localhost:${PORT}/api`);
 
   // Test database connection
   await testConnection();

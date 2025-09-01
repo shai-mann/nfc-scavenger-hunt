@@ -1,11 +1,11 @@
-import { query } from '../db';
-import { UserProgressRow, ClueRow } from '../types/database';
+import { query } from "../db";
+import { ClueRow, UserProgressRow } from "../types/database";
 
 interface UnlockedClue extends ClueRow {
   unlocked_at: Date;
 }
 
-export class UserProgress {
+class UserProgress {
   public id: number;
   public user_id: string;
   public clue_id: string;
@@ -18,9 +18,12 @@ export class UserProgress {
     this.completed_at = data.completed_at;
   }
 
-  static async findByUserAndClue(userId: string, clueId: string): Promise<UserProgress | null> {
+  static async findByUserAndClue(
+    userId: string,
+    clueId: string
+  ): Promise<UserProgress | null> {
     const result = await query<UserProgressRow>(
-      'SELECT * FROM user_progress WHERE user_id = $1 AND clue_id = $2',
+      "SELECT * FROM user_progress WHERE user_id = $1 AND clue_id = $2",
       [userId, clueId]
     );
     return result.rows.length > 0 ? new UserProgress(result.rows[0]!) : null;
@@ -28,7 +31,7 @@ export class UserProgress {
 
   static async findByUser(userId: string): Promise<UserProgress[]> {
     const result = await query<UserProgressRow>(
-      'SELECT * FROM user_progress WHERE user_id = $1 ORDER BY completed_at',
+      "SELECT * FROM user_progress WHERE user_id = $1 ORDER BY completed_at",
       [userId]
     );
     return result.rows.map((row) => new UserProgress(row));
@@ -46,13 +49,19 @@ export class UserProgress {
     return result.rows;
   }
 
-  static async hasUserUnlockedClue(userId: string, clueId: string): Promise<boolean> {
+  static async hasUserUnlockedClue(
+    userId: string,
+    clueId: string
+  ): Promise<boolean> {
     return (await this.findByUserAndClue(userId, clueId)) !== null;
   }
 
-  static async hasUserUnlockedAllClues(userId: string, clueIds: string[]): Promise<boolean> {
+  static async hasUserUnlockedAllClues(
+    userId: string,
+    clueIds: string[]
+  ): Promise<boolean> {
     const result = await query<{ count: string }>(
-      'SELECT COUNT(DISTINCT clue_id) as count FROM user_progress WHERE user_id = $1 AND clue_id = ANY($2)',
+      "SELECT COUNT(DISTINCT clue_id) as count FROM user_progress WHERE user_id = $1 AND clue_id = ANY($2)",
       [userId, clueIds]
     );
     return parseInt(result.rows[0]!.count) === clueIds.length;
@@ -60,7 +69,7 @@ export class UserProgress {
 
   static async create(userId: string, clueId: string): Promise<UserProgress> {
     const result = await query<UserProgressRow>(
-      'INSERT INTO user_progress (user_id, clue_id) VALUES ($1, $2) RETURNING *',
+      "INSERT INTO user_progress (user_id, clue_id) VALUES ($1, $2) RETURNING *",
       [userId, clueId]
     );
     return new UserProgress(result.rows[0]!);

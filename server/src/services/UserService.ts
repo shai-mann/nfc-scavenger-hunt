@@ -1,10 +1,14 @@
 import User from "../models/User";
 import { CreateUserRequest } from "../types/api";
-import { ConflictError, NotFoundError } from "../utils/errors";
+import { ConflictError, NotFoundError, ValidationError } from "../utils/errors";
 
 class UserService {
   static async registerUser(userData: CreateUserRequest): Promise<User> {
     const { username } = userData;
+
+    if (username.length > 50 || username.length < 3) {
+      throw new ValidationError("Username must be between 3 and 50 characters");
+    }
 
     // Check if username already exists
     const existingUser = await User.findByUsername(username);

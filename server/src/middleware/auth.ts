@@ -1,6 +1,6 @@
-import { Request, Response, NextFunction } from 'express';
-import UserService from '../services/UserService';
-import { ValidationError } from '../utils/errors';
+import { NextFunction, Request, Response } from "express";
+import UserService from "../services/UserService";
+import { ValidationError } from "../utils/errors";
 
 declare global {
   namespace Express {
@@ -12,15 +12,15 @@ declare global {
 
 // Middleware to extract and validate user authentication from request
 export const requireAuth = async (
-  req: Request, 
-  res: Response, 
+  req: Request,
+  res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
     // Extract userId from different sources based on HTTP method
     let userId: string | undefined;
 
-    if (req.method === 'GET') {
+    if (req.method === "GET") {
       userId = req.query.userId as string;
     } else {
       userId = req.body.userId as string;
@@ -28,7 +28,7 @@ export const requireAuth = async (
 
     // Check if userId is provided
     if (!userId) {
-      throw new ValidationError('User ID is required');
+      throw new ValidationError("User ID is required");
     }
 
     // Validate user exists
@@ -45,14 +45,14 @@ export const requireAuth = async (
 
 // Optional auth middleware (doesn't fail if no user provided)
 export const optionalAuth = async (
-  req: Request, 
-  res: Response, 
+  req: Request,
+  res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
     let userId: string | undefined;
 
-    if (req.method === 'GET') {
+    if (req.method === "GET") {
       userId = req.query.userId as string;
     } else {
       userId = req.body.userId as string;

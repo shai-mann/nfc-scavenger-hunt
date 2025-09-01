@@ -26,7 +26,7 @@ export const VerifyCluePasswordSchema = z.object({
 });
 
 export const CompleteClueSchema = z.object({
-  user_id: z.uuid("Invalid user ID format"),
+  userId: z.uuid("Invalid user ID format"),
   password: z.string().min(1, "Password is required"),
 });
 

@@ -30,6 +30,24 @@ async function resetDatabase() {
     console.log("Creating tables from schema...");
     await client.query(schemaSql);
 
+    // Create clue data
+    const clueDataPath = path.join(__dirname, "..", "clues.json");
+    const clueData = fs.readFileSync(clueDataPath, "utf8");
+    const clueDataJson = JSON.parse(clueData);
+
+    for (const clue of clueDataJson) {
+      await client.query(
+        "INSERT INTO clues (title, data, password, lock_state, order_index) VALUES ($1, $2, $3, $4, $5)",
+        [
+          clue.title,
+          clue.data,
+          clue.password,
+          clue.lock_state ?? "none",
+          clue.order_index,
+        ]
+      );
+    }
+
     console.log("Database reset completed successfully!");
   } catch (error) {
     console.error("Error resetting database:", error);
