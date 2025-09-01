@@ -6,9 +6,12 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/index.ts",
-    "dev": "tsx src/index.ts",
-    "dev:watch": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "dev": "tsx scripts/dev-with-reset.ts",
+    "dev:watch": "tsx scripts/dev-with-reset.ts --watch",
+    "dev:reset": "tsx scripts/dev-with-reset.ts --reset",
+    "dev:reset:watch": "tsx scripts/dev-with-reset.ts --reset --watch",
+    "db:reset": "tsx scripts/reset-db.ts",
     "lint": "tsc --noEmit",
     "clean": "rm -rf dist",
     "test": "echo \"Error: no test specified\" && exit 1"
