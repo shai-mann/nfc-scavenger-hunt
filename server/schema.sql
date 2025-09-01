@@ -1,8 +1,11 @@
 -- NFC Scavenger Hunt Database Schema
 
+-- Enable UUID extension
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 -- Create users table
 CREATE TABLE IF NOT EXISTS users (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     username VARCHAR(50) UNIQUE NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -13,11 +16,9 @@ CREATE TYPE lock_state_enum AS ENUM ('none', 'requires_previous');
 
 -- Create clues table
 CREATE TABLE IF NOT EXISTS clues (
-    id VARCHAR(50) PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     title VARCHAR(255) NOT NULL,
-    text TEXT NOT NULL,
-    is_copyable BOOLEAN DEFAULT true,
-    image_url TEXT,
+    data JSONB,
     password VARCHAR(255) NOT NULL,
     lock_state lock_state_enum DEFAULT 'none',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -28,18 +29,14 @@ CREATE TABLE IF NOT EXISTS clues (
 -- Create user_progress table to track which clues users have completed
 CREATE TABLE IF NOT EXISTS user_progress (
     id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    clue_id VARCHAR(50) REFERENCES clues(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    clue_id UUID REFERENCES clues(id) ON DELETE CASCADE,
     completed_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(user_id, clue_id)
 );
 
--- Insert sample clues
-INSERT INTO clues (id, title, text, is_copyable, image_url, location, password, lock_state, order_index) VALUES
-('clue-1', 'The Hidden Library', 'Find the ancient tome hidden behind the third pillar from the entrance. The answer lies within its weathered pages.', true, null, 'Main Library', 'ancient_wisdom', 'none', 1),
-('clue-2', 'Secret Garden Path', 'Follow the stone path that winds through the rose garden. Count the steps and remember the number.', false, null, 'Botanical Gardens', 'rose_steps', 'requires_previous', 2),
-('clue-3', 'The Clock Tower Mystery', 'At exactly 3:15 PM, the shadow of the clock tower points to a hidden marker. What do you see?', true, 'https://example.com/clock-tower.jpg', 'Clock Tower Plaza', 'shadow_marker', 'requires_previous', 3)
-ON CONFLICT (id) DO NOTHING;
+-- Sample clues are created by running the create-clues.sql script
+-- \i scripts/create-clues.sql
 
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
