@@ -257,9 +257,19 @@ export async function createUser(
   }
 }
 
+interface UserClueProgress {
+  id: string;
+  title: string;
+  order_index: number;
+  unlocked_at: string | null;
+}
+
 export async function getUserClues(
   userId: string
-): Promise<{ success: true; data: any[] } | { success: false; error: string }> {
+): Promise<
+  | { success: true; data: UserClueProgress[] }
+  | { success: false; error: string }
+> {
   try {
     const { data: userProgress, error: progressError } = await supabase
       .from("clues")
@@ -279,7 +289,7 @@ export async function getUserClues(
       return { success: false, error: "Failed to fetch user progress" };
     }
 
-    const clues = (userProgress || []).map((progress) => ({
+    const clues = userProgress.map((progress) => ({
       id: progress.id,
       title: progress.title,
       order_index: progress.order_index,
