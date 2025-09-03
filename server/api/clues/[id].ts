@@ -1,33 +1,34 @@
-import { VercelRequest, VercelResponse } from '@vercel/node';
-import { supabase } from '../../lib/supabase';
-import { ClueParamsSchema } from '../../lib/types';
-import { ZodError } from 'zod';
+import { VercelRequest, VercelResponse } from "@vercel/node";
+import { ZodError } from "zod";
+import { supabase } from "../../lib/supabase";
+import { ClueParamsSchema } from "../../lib/types";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Set CORS headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
 
-  if (req.method !== 'GET') {
+  if (req.method !== "GET") {
     return res.status(405).json({
       success: false,
-      error: 'Method not allowed'
+      error: "Method not allowed",
     });
   }
 
   try {
     // Simple auth check - get userId from headers or query params
-    const userId = req.headers['x-user-id'] as string || req.query.userId as string;
-    
+    const userId =
+      (req.headers["x-user-id"] as string) || (req.query.userId as string);
+
     if (!userId) {
       return res.status(401).json({
         success: false,
-        error: 'User ID required'
+        error: "User ID required",
       });
     }
 
@@ -37,50 +38,49 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Check if user has unlocked this clue
     const { data: userProgress, error: progressError } = await supabase
-      .from('user_progress')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('clue_id', clueId)
+      .from("user_progress")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("clue_id", clueId)
       .single();
 
     if (progressError || !userProgress) {
       return res.status(403).json({
         success: false,
-        error: 'Clue not unlocked for this user'
+        error: "Clue not unlocked for this user",
       });
     }
 
     // Get the clue details
     const { data: clue, error: clueError } = await supabase
-      .from('clues')
-      .select('*')
-      .eq('id', clueId)
+      .from("clues")
+      .select("*")
+      .eq("id", clueId)
       .single();
 
     if (clueError || !clue) {
       return res.status(404).json({
         success: false,
-        error: 'Clue not found'
+        error: "Clue not found",
       });
     }
 
     return res.status(200).json({
       success: true,
-      data: clue
+      data: clue,
     });
-
   } catch (error) {
     if (error instanceof ZodError) {
       return res.status(400).json({
         success: false,
-        error: 'Invalid clue ID format'
+        error: "Invalid clue ID format",
       });
     }
 
-    console.error('Get clue error:', error);
+    console.error("Get clue error:", error);
     return res.status(500).json({
       success: false,
-      error: 'Internal server error'
+      error: "Internal server error",
     });
   }
 }

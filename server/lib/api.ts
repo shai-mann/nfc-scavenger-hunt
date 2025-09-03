@@ -1,11 +1,11 @@
-import { CreateUserRequest, ApiResponse, User, Clue, CompleteClueRequest } from './types';
+import { ApiResponse, Clue, CreateUserRequest, User } from "./types";
 
 // Get the base URL - in production this will be your deployed URL
 const getBaseUrl = () => {
-  if (process.env.NODE_ENV === 'development') {
-    return 'http://localhost:3000'; // For local development
+  if (process.env.NODE_ENV === "development") {
+    return "http://localhost:3000"; // For local development
   }
-  return 'https://your-app-name.vercel.app'; // Replace with your actual Vercel URL
+  return "https://your-app-name.vercel.app"; // Replace with your actual Vercel URL
 };
 
 const BASE_URL = getBaseUrl();
@@ -31,10 +31,10 @@ class ApiClient {
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
     const url = `${this.baseUrl}/api${endpoint}`;
-    
+
     const headers = {
-      'Content-Type': 'application/json',
-      ...(this.userId && { 'x-user-id': this.userId }),
+      "Content-Type": "application/json",
+      ...(this.userId && { "x-user-id": this.userId }),
       ...options.headers,
     };
 
@@ -49,24 +49,24 @@ class ApiClient {
       if (!response.ok) {
         return {
           success: false,
-          error: data.error || 'An error occurred',
+          error: data.error || "An error occurred",
         };
       }
 
       return data;
     } catch (error) {
-      console.error('API request failed:', error);
+      console.error("API request failed:", error);
       return {
         success: false,
-        error: 'Network error occurred',
+        error: "Network error occurred",
       };
     }
   }
 
   // User endpoints
   async registerUser(userData: CreateUserRequest): Promise<ApiResponse<User>> {
-    const response = await this.makeRequest<User>('/users/register', {
-      method: 'POST',
+    const response = await this.makeRequest<User>("/users/register", {
+      method: "POST",
       body: JSON.stringify(userData),
     });
 
@@ -82,32 +82,35 @@ class ApiClient {
     if (!this.userId) {
       return {
         success: false,
-        error: 'No user ID available',
+        error: "No user ID available",
       };
     }
 
-    return this.makeRequest<User>('/users/profile');
+    return this.makeRequest<User>("/users/profile");
   }
 
   // Clue endpoints
   async getUserClues(): Promise<ApiResponse<Clue[]>> {
-    return this.makeRequest<Clue[]>('/clues');
+    return this.makeRequest<Clue[]>("/clues");
   }
 
   async getClue(clueId: string): Promise<ApiResponse<Clue>> {
     return this.makeRequest<Clue>(`/clues/${clueId}`);
   }
 
-  async unlockClue(clueId: string, password: string): Promise<ApiResponse<any>> {
+  async unlockClue(
+    clueId: string,
+    password: string
+  ): Promise<ApiResponse<any>> {
     if (!this.userId) {
       return {
         success: false,
-        error: 'No user ID available',
+        error: "No user ID available",
       };
     }
 
     return this.makeRequest<any>(`/clues/${clueId}/unlock`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify({
         userId: this.userId,
         password,
@@ -117,7 +120,7 @@ class ApiClient {
 
   // Health check
   async healthCheck(): Promise<ApiResponse<any>> {
-    return this.makeRequest<any>('/health');
+    return this.makeRequest<any>("/health");
   }
 }
 
@@ -125,4 +128,4 @@ class ApiClient {
 export const apiClient = new ApiClient(BASE_URL);
 
 // Export types for convenience
-export type { CreateUserRequest, ApiResponse, User, Clue };
+export type { ApiResponse, Clue, CreateUserRequest, User };

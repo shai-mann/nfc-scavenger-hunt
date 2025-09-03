@@ -58,9 +58,7 @@ export interface Clue {
   title: string;
   description: string;
   nfc_tag_id: string;
-  location_hint: string;
   order_index: number;
-  is_active: boolean;
   created_at: string;
 }
 
@@ -69,7 +67,6 @@ export interface UserProgress {
   user_id: string;
   clue_id: string;
   unlocked_at: string;
-  completed_at: string | null;
 }
 
 // API Response types
