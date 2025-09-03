@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS clues (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     title VARCHAR(255) NOT NULL,
-    description TEXT,
+    data JSONB, -- Clue data is stored as raw JSON, to avoid restricting the data structure
     nfc_tag_id VARCHAR(255) NOT NULL, -- This serves as the password for unlocking
     order_index INTEGER DEFAULT 0,
 );
@@ -28,7 +28,6 @@ CREATE TABLE IF NOT EXISTS user_progress (
 
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_users_name ON users(name);
-CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_user_progress_user_id ON user_progress(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_progress_clue_id ON user_progress(clue_id);
 CREATE INDEX IF NOT EXISTS idx_clues_order_index ON clues(order_index);
