@@ -2,19 +2,13 @@
   "name": "nfc-scavenger-hunt-server",
   "version": "1.0.0",
   "description": "Backend server for NFC Scavenger Hunt app",
-  "main": "dist/index.js",
-  "type": "module",
+  "main": "api/index.ts",
   "scripts": {
-    "build": "tsc",
-    "start": "node dist/index.js",
-    "dev": "tsx scripts/dev-with-reset.ts",
-    "dev:watch": "tsx scripts/dev-with-reset.ts --watch",
-    "dev:reset": "tsx scripts/dev-with-reset.ts --reset",
-    "dev:reset:watch": "tsx scripts/dev-with-reset.ts --reset --watch",
     "db:reset": "tsx scripts/reset-db.ts",
     "lint": "tsc --noEmit",
-    "clean": "rm -rf dist",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "clean": "rm -rf public",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "generate-clues": "node scripts/clues/generate-clue-sql.js"
   },
   "keywords": [
     "nfc",
@@ -22,14 +16,19 @@
     "node",
     "express"
   ],
+  "engines": {
+    "node": "22.x"
+  },
   "author": "Shai Mann-Robison",
   "license": "ISC",
   "dependencies": {
+    "@supabase/supabase-js": "^2.57.0",
+    "@vercel/node": "^5.3.19",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
     "express": "^4.18.2",
     "pg": "^8.16.3",
-    "zod": "^4.1.5"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
@@ -38,6 +37,7 @@
     "@types/pg": "^8.15.5",
     "nodemon": "^3.0.1",
     "tsx": "^4.20.5",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "vercel": "^47.0.1"
   }
 }

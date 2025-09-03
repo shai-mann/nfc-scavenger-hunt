@@ -2,6 +2,7 @@ import Logo from "@/assets/images/DDlogo.png";
 import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { cn } from "@/lib/utils";
+import { apiClient } from "@/server/lib/api";
 import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -24,18 +25,33 @@ import Animated, {
 export default function RegistrationPage() {
   const [username, setUsername] = useState("");
   const [errorText, setErrorText] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const inputRef = useRef<any>(null);
 
-  const handleRegistration = () => {
-    // TODO: confirm uniqueness of username
+  const handleRegistration = async () => {
     if (username.trim().length === 0) {
       setErrorText("Please enter a username");
       return;
     }
 
-    // Here you would typically save the username to storage/state
-    // For now, just navigate to the home page
-    router.replace("/(tabs)");
+    setIsLoading(true);
+    setErrorText("");
+
+    try {
+      const response = await apiClient.registerUser({ username: username.trim() });
+      
+      if (response.success && response.data) {
+        // Registration successful, navigate to home
+        router.replace("/(tabs)");
+      } else {
+        setErrorText(response.error || "Registration failed");
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      setErrorText("Network error occurred");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -125,6 +141,11 @@ export default function RegistrationPage() {
                   onChangeText={setUsername}
                   autoCorrect={false}
                 />
+                {errorText && (
+                  <Text className="text-destructive text-sm mt-2 text-center">
+                    {errorText}
+                  </Text>
+                )}
               </View>
             </View>
             {/* Spacer to push button down when keyboard is hidden */}
@@ -136,17 +157,17 @@ export default function RegistrationPage() {
                 onPress={handleRegistration}
                 onPressIn={() => (scale.value = withSpring(0.95))}
                 onPressOut={() => (scale.value = withSpring(1))}
-                disabled={username.trim().length === 0}
+                disabled={username.trim().length === 0 || isLoading}
               >
                 <Animated.View
                   className={cn(
                     "bg-primary rounded-md p-3 w-full items-center justify-center",
-                    username.trim().length === 0 && "opacity-50"
+                    (username.trim().length === 0 || isLoading) && "opacity-50"
                   )}
                   style={animatedButtonStyle}
                 >
                   <Text className="text-white font-semibold">
-                    Start the Hunt!
+                    {isLoading ? "Creating Account..." : "Start the Hunt!"}
                   </Text>
                 </Animated.View>
               </Pressable>

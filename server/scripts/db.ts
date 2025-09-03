@@ -1,5 +1,4 @@
 import { Pool, PoolClient } from "pg";
-import { DatabaseQueryResult } from "./types/database";
 
 const pool = new Pool({
   user: process.env.DB_USER,
@@ -17,10 +16,7 @@ pool.on("error", (err: Error) => {
   process.exit(-1);
 });
 
-export async function query<T = any>(
-  text: string,
-  params?: any[]
-): Promise<DatabaseQueryResult<T>> {
+export async function query<T = any>(text: string, params?: any[]) {
   const client = await pool.connect();
   try {
     const result = await client.query(text, params);

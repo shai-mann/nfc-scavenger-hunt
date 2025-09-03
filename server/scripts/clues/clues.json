@@ -1,5 +1,6 @@
 [
   {
+    "id": "ed077b47-88cf-42a0-8869-ca1d91ff4a39",
     "title": "The Hidden Library",
     "data": {
       "text": "Example Text for the first clue",
@@ -9,6 +10,7 @@
     "order_index": 1
   },
   {
+    "id": "89392397-65b6-47e1-ba78-83446bcd9ef3",
     "title": "Secret Garden Path",
     "data": {
       "text": "Example Text for the second clue",
@@ -18,6 +20,7 @@
     "order_index": 2
   },
   {
+    "id": "babf0130-7e4d-44fa-b555-b33960aea27b",
     "title": "The Clock Tower Mystery",
     "data": {
       "text": "Example Text for the third clue",
