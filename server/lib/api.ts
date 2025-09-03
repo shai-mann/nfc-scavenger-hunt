@@ -257,5 +257,40 @@ export async function createUser(
   }
 }
 
+export async function getUserClues(
+  userId: string
+): Promise<{ success: true; data: any[] } | { success: false; error: string }> {
+  try {
+    const { data: userProgress, error: progressError } = await supabase
+      .from("clues")
+      .select(
+        `
+      id,
+      title,
+      order_index,
+      user_progress!left (
+        unlocked_at
+      )
+    `
+      )
+      .eq("user_progress.user_id", userId);
+
+    if (progressError) {
+      return { success: false, error: "Failed to fetch user progress" };
+    }
+
+    const clues = (userProgress || []).map((progress) => ({
+      id: progress.id,
+      title: progress.title,
+      order_index: progress.order_index,
+      unlocked_at: progress.user_progress[0]?.unlocked_at || null,
+    }));
+
+    return { success: true, data: clues };
+  } catch {
+    return { success: false, error: "Failed to fetch user progress" };
+  }
+}
+
 // Export types for convenience
 export type { ApiResponse, Clue, CreateUserRequest, User };
