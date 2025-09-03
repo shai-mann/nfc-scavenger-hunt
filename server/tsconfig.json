@@ -19,9 +19,8 @@
     "rootDir": ".",
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"],
+      "@/lib/*": ["./lib/*"]
     },
     "typeRoots": [
       "./node_modules/@types",
@@ -46,11 +45,7 @@
       }
     ]
   },
-  "include": [
-    "app/api/**/*",
-    "lib/**/*",
-    ".next/types/**/*.ts"
-  ],
+  "include": ["app/api/**/*", "lib/**/*", ".next/types/**/*.ts"],
   "exclude": [
     "node_modules",
     "dist",

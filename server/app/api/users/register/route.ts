@@ -1,12 +1,12 @@
-import { NextRequest } from "next/server";
 import {
   createErrorResponse,
   createSuccessResponse,
   createUser,
   findUserByUsername,
   validateRequestBody,
-} from "../../../lib/api";
-import { CreateUserSchema } from "../../../lib/types";
+} from "@/lib/api";
+import { CreateUserSchema } from "@/lib/types";
+import { NextRequest } from "next/server";
 
 export async function POST(request: NextRequest) {
   // Validate request body
