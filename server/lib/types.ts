@@ -49,7 +49,6 @@ export type UserProgressParams = z.infer<typeof UserProgressParamsSchema>;
 export interface User {
   id: string;
   name: string;
-  email: string;
   created_at: string;
 }
 

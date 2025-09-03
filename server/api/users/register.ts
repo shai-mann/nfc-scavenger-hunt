@@ -1,67 +1,40 @@
-import { VercelRequest, VercelResponse } from "@vercel/node";
-import { ZodError } from "zod";
-import { supabase } from "../../lib/supabase";
+import { NextRequest } from "next/server";
+import {
+  createErrorResponse,
+  createSuccessResponse,
+  createUser,
+  findUserByUsername,
+  validateRequestBody,
+} from "../../lib/api";
 import { CreateUserSchema } from "../../lib/types";
 
-export async function POST(req: VercelRequest, res: VercelResponse) {
-  try {
-    const validatedData = CreateUserSchema.parse(req.body);
-    const { username } = validatedData;
-
-    // Check if username already exists
-    const { data: existingUser, error: existingUserError } = await supabase
-      .from("users")
-      .select("id")
-      .eq("name", username)
-      .single();
-
-    if (existingUserError && existingUserError.code !== "PGRST116") {
-      throw new Error("Database query failed");
-    }
-
-    if (existingUser) {
-      return res.status(409).json({
-        success: false,
-        error: "This username is already registered",
-      });
-    }
-
-    // Create new user
-    const { data: newUser, error: createError } = await supabase
-      .from("users")
-      .insert([
-        {
-          name: username,
-        },
-      ])
-      .select()
-      .single();
-
-    if (createError) {
-      throw new Error("Failed to create user");
-    }
-
-    return res.status(201).json({
-      success: true,
-      data: {
-        id: newUser.id,
-        username: newUser.name,
-        created_at: newUser.created_at,
-      },
-    });
-  } catch (error) {
-    if (error instanceof ZodError) {
-      return res.status(400).json({
-        success: false,
-        error: "Validation failed",
-        details: error.issues,
-      });
-    }
-
-    console.error("User registration error:", error);
-    return res.status(500).json({
-      success: false,
-      error: "Internal server error",
-    });
+export async function POST(request: NextRequest) {
+  // Validate request body
+  const validation = await validateRequestBody(request, CreateUserSchema);
+  if (!validation.success) {
+    return validation.response;
   }
+
+  const { username } = validation.data;
+
+  // Check if username already exists
+  const existingUser = await findUserByUsername(username);
+  if (existingUser) {
+    return createErrorResponse("This username is already registered", 409);
+  }
+
+  // Create new user
+  const userResult = await createUser(username);
+  if (!userResult.success) {
+    return createErrorResponse(userResult.error, 500);
+  }
+
+  return createSuccessResponse(
+    {
+      id: userResult.data.id,
+      username: userResult.data.name,
+      created_at: userResult.data.created_at,
+    },
+    201
+  );
 }

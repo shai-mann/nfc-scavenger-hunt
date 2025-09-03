@@ -1,3 +1,6 @@
+import { NextRequest, NextResponse } from "next/server";
+import { ZodError, ZodSchema } from "zod";
+import { supabase } from "./supabase";
 import { ApiResponse, Clue, CreateUserRequest, User } from "./types";
 
 // Get the base URL - in production this will be your deployed URL
@@ -126,6 +129,133 @@ class ApiClient {
 
 // Create and export a singleton instance
 export const apiClient = new ApiClient(BASE_URL);
+
+// Helper functions for API routes
+export async function validateRequestBody<T>(
+  request: NextRequest,
+  schema: ZodSchema<T>
+): Promise<
+  { success: true; data: T } | { success: false; response: NextResponse }
+> {
+  try {
+    const body = await request.json();
+    const validatedData = schema.parse(body);
+    return { success: true, data: validatedData };
+  } catch (error) {
+    if (error instanceof ZodError) {
+      return {
+        success: false,
+        response: NextResponse.json(
+          {
+            success: false,
+            error: "Validation failed",
+            details: error.issues,
+          },
+          { status: 400 }
+        ),
+      };
+    }
+    return {
+      success: false,
+      response: NextResponse.json(
+        {
+          success: false,
+          error: "Invalid request body",
+        },
+        { status: 400 }
+      ),
+    };
+  }
+}
+
+export function getUserIdFromRequest(request: NextRequest): string | null {
+  // Try to get from headers first
+  const headerUserId = request.headers.get("x-user-id");
+  if (headerUserId) return headerUserId;
+
+  // Try to get from query params
+  const url = new URL(request.url);
+  const queryUserId = url.searchParams.get("userId");
+  if (queryUserId) return queryUserId;
+
+  return null;
+}
+
+export function createErrorResponse(
+  message: string,
+  status: number = 500
+): NextResponse {
+  return NextResponse.json(
+    {
+      success: false,
+      error: message,
+    },
+    { status }
+  );
+}
+
+export function createSuccessResponse<T>(
+  data: T,
+  status: number = 200
+): NextResponse {
+  return NextResponse.json(
+    {
+      success: true,
+      data,
+    },
+    { status }
+  );
+}
+
+export async function findUserById(userId: string): Promise<User | null> {
+  const { data: user, error } = await supabase
+    .from("users")
+    .select("*")
+    .eq("id", userId)
+    .single();
+
+  if (error || !user) {
+    return null;
+  }
+
+  return user;
+}
+
+export async function findUserByUsername(
+  username: string
+): Promise<User | null> {
+  const { data: user, error } = await supabase
+    .from("users")
+    .select("*")
+    .eq("name", username)
+    .single();
+
+  if (error && error.code !== "PGRST116") {
+    throw new Error("Database query failed");
+  }
+
+  return user;
+}
+
+export async function createUser(
+  username: string
+): Promise<{ success: true; data: User } | { success: false; error: string }> {
+  try {
+    const { data: newUser, error } = await supabase
+      .from("users")
+      .insert([{ name: username }])
+      .select()
+      .single();
+
+    if (error) {
+      return { success: false, error: "Failed to create user" };
+    }
+
+    return { success: true, data: newUser };
+  } catch {
+    return { success: false, error: "Failed to create user" };
+  }
+}
 
 // Export types for convenience
 export type { ApiResponse, Clue, CreateUserRequest, User };
