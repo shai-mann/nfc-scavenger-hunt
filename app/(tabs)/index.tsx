@@ -1,101 +1,75 @@
 import Logo from "@/assets/images/DDlogo.png";
 import { CluePath } from "@/components/CluePath";
 import { Text } from "@/components/ui/text";
+import { apiClient, Clue } from "@/server/lib/api";
 import { BookOpen } from "lucide-react-native";
-import React from "react";
-import { Image, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { Image, TouchableOpacity, View, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export interface Clue {
-  id: number;
+export interface ClueForDisplay {
+  id: string;
   name: string;
   description: string;
   isFound: boolean;
 }
 
-const CLUES: Clue[] = [
-  {
-    id: 1,
-    name: "Clue 1",
-    description: "This is the first clue",
-    isFound: true,
-  },
-  {
-    id: 2,
-    name: "Clue 2",
-    description: "This is the second clue",
-    isFound: true,
-  },
-
-  {
-    id: 3,
-    name: "Clue 3",
-    description: "This is the third clue",
-    isFound: true,
-  },
-  {
-    id: 4,
-    name: "Clue 4",
-    description: "This is the fourth clue",
-    isFound: false,
-  },
-  {
-    id: 5,
-    name: "Clue 5",
-    description: "This is the fifth clue",
-    isFound: false,
-  },
-  {
-    id: 6,
-    name: "Clue 6",
-    description: "This is the sixth clue",
-    isFound: false,
-  },
-  {
-    id: 7,
-    name: "Clue 7",
-    description: "This is the seventh clue",
-    isFound: false,
-  },
-  {
-    id: 8,
-    name: "Clue 8",
-    description: "This is the eighth clue",
-    isFound: false,
-  },
-  {
-    id: 9,
-    name: "Clue 9",
-    description: "This is the ninth clue",
-    isFound: false,
-  },
-  {
-    id: 10,
-    name: "Clue 10",
-    description: "This is the tenth clue",
-    isFound: false,
-  },
-  {
-    id: 11,
-    name: "Clue 11",
-    description: "This is the eleventh clue",
-    isFound: false,
-  },
-  {
-    id: 12,
-    name: "Clue 12",
-    description: "This is the twelfth clue",
-    isFound: false,
-  },
-  {
-    id: 13,
-    name: "Clue 13",
-    description: "This is the thirteenth clue",
-    isFound: false,
-  },
-];
-
 export default function HomePage() {
+  const [clues, setClues] = useState<ClueForDisplay[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>("");
+
+  useEffect(() => {
+    loadUserClues();
+  }, []);
+
+  const loadUserClues = async () => {
+    try {
+      setLoading(true);
+      const response = await apiClient.getUserClues();
+      
+      if (response.success && response.data) {
+        const cluesForDisplay: ClueForDisplay[] = response.data.map((clue: any) => ({
+          id: clue.id,
+          name: clue.title,
+          description: clue.title, // Using title as description for now
+          isFound: !!clue.unlocked_at,
+        }));
+        setClues(cluesForDisplay);
+      } else {
+        setError(response.error || "Failed to load clues");
+      }
+    } catch (err) {
+      setError("Network error occurred");
+      console.error("Error loading clues:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <SafeAreaView className="flex-1 bg-white flex flex-col items-center justify-center">
+        <ActivityIndicator size="large" color="#AD8AD1" />
+        <Text className="mt-4 text-gray-500">Loading your progress...</Text>
+      </SafeAreaView>
+    );
+  }
+
+  if (error) {
+    return (
+      <SafeAreaView className="flex-1 bg-white flex flex-col items-center justify-center">
+        <Text className="text-red-500 text-center px-4">{error}</Text>
+        <TouchableOpacity 
+          onPress={loadUserClues}
+          className="mt-4 bg-primary px-4 py-2 rounded"
+        >
+          <Text className="text-white">Retry</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView className="flex-1 bg-white flex flex-col">
       <View className="px-5 py-2 flex flex-col items-center justify-center border-secondary border-b">
@@ -106,7 +80,7 @@ export default function HomePage() {
           Bits&apos; Hunt!
         </Text>
         <Text variant="default" className="text-gray-500 font-semibold">
-          Rank: 1
+          Clues Found: {clues.filter(c => c.isFound).length}
         </Text>
 
         {/* Rules button, floating right */}
@@ -114,7 +88,7 @@ export default function HomePage() {
           <BookOpen size={20} color="#AD8AD1" />
         </TouchableOpacity>
       </View>
-      <CluePath clues={CLUES} />
+      <CluePath clues={clues} />
     </SafeAreaView>
   );
 }
