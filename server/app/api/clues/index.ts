@@ -3,7 +3,7 @@ import {
   createErrorResponse,
   createSuccessResponse,
   getUserIdFromRequest,
-} from "../../../lib/api";
+} from "@/lib/api";
 console.log(typeof createErrorResponse);
 
 export async function GET(request: NextRequest) {

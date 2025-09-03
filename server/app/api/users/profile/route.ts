@@ -4,7 +4,7 @@ import {
   createSuccessResponse,
   findUserById,
   getUserIdFromRequest,
-} from "../../../lib/api";
+} from "@/lib/api";
 
 export async function GET(request: NextRequest) {
   // Get user ID from request
