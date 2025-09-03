@@ -4,9 +4,6 @@
   "description": "Backend server for NFC Scavenger Hunt app",
   "main": "api/index.ts",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
     "db:reset": "tsx scripts/reset-db.ts",
     "lint": "tsc --noEmit",
     "clean": "rm -rf public",
@@ -27,10 +24,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
     "express": "^4.18.2",
-    "next": "^15.5.2",
     "pg": "^8.16.3",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
     "zod": "^3.25.76"
   },
   "devDependencies": {

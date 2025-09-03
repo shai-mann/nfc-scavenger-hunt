@@ -1,7 +1,25 @@
-import { NextRequest, NextResponse } from "next/server";
+import { VercelRequest, VercelResponse } from "@vercel/node";
 import { ZodError, ZodSchema } from "zod";
 import { supabase } from "./supabase";
 import { ApiResponse, Clue, CreateUserRequest, User } from "./types";
+
+// Method restriction helper for Vercel Functions
+export function withMethodRestriction(
+  allowedMethods: string[],
+  handler: (req: VercelRequest, res: VercelResponse) => Promise<void>
+) {
+  return async (req: VercelRequest, res: VercelResponse): Promise<void> => {
+    if (!allowedMethods.includes(req.method || "")) {
+      res.status(405).json({
+        success: false,
+        error: `Method ${req.method} not allowed`,
+      });
+      res.setHeader("Allow", allowedMethods.join(", "));
+      return;
+    }
+    return handler(req, res);
+  };
+}
 
 // Get the base URL - in production this will be your deployed URL
 const getBaseUrl = () => {
@@ -131,80 +149,64 @@ class ApiClient {
 export const apiClient = new ApiClient(BASE_URL);
 
 // Helper functions for API routes
+// Helper functions for validating request bodies in Vercel Functions
 export async function validateRequestBody<T>(
-  request: NextRequest,
+  req: VercelRequest,
+  res: VercelResponse,
   schema: ZodSchema<T>
-): Promise<
-  { success: true; data: T } | { success: false; response: NextResponse }
-> {
+): Promise<T | null> {
   try {
-    const body = await request.json();
-    const validatedData = schema.parse(body);
-    return { success: true, data: validatedData };
+    const validatedData = schema.parse(req.body);
+    return validatedData;
   } catch (error) {
     if (error instanceof ZodError) {
-      return {
+      res.status(400).json({
         success: false,
-        response: NextResponse.json(
-          {
-            success: false,
-            error: "Validation failed",
-            details: error.issues,
-          },
-          { status: 400 }
-        ),
-      };
+        error: "Validation failed",
+        details: error.issues,
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: "Invalid request body",
+      });
     }
-    return {
-      success: false,
-      response: NextResponse.json(
-        {
-          success: false,
-          error: "Invalid request body",
-        },
-        { status: 400 }
-      ),
-    };
+    return null;
   }
 }
 
-export function getUserIdFromRequest(request: NextRequest): string | null {
+export function getUserIdFromRequest(req: VercelRequest): string | null {
   // Try to get from headers first
-  const headerUserId = request.headers.get("x-user-id");
+  const headerUserId = req.headers["x-user-id"] as string;
   if (headerUserId) return headerUserId;
 
   // Try to get from query params
-  const url = new URL(request.url);
-  const queryUserId = url.searchParams.get("userId");
+  const queryUserId = req.query.userId as string;
   if (queryUserId) return queryUserId;
 
   return null;
 }
 
 export function createErrorResponse(
+  res: VercelResponse,
   message: string,
   status: number = 500
-): NextResponse {
-  return NextResponse.json(
-    {
-      success: false,
-      error: message,
-    },
-    { status }
-  );
+): void {
+  res.status(status).json({
+    success: false,
+    error: message,
+  });
 }
 
 export function createSuccessResponse<T>(
+  res: VercelResponse,
   data: T,
   status: number = 200
-): NextResponse {
-  return NextResponse.json(
-    {
-      success: true,
-      data,
-    },
-    { status }
-  );
+): void {
+  res.status(status).json({
+    success: true,
+    data,
+  });
 }
 
 export async function findUserById(userId: string): Promise<User | null> {

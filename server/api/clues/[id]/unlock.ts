@@ -1,44 +1,51 @@
-import { NextRequest } from "next/server";
+import { VercelRequest, VercelResponse } from "@vercel/node";
 import { ZodError } from "zod";
 import {
   createErrorResponse,
   createSuccessResponse,
   validateRequestBody,
-} from "../../../../lib/api";
-import { supabase } from "../../../../lib/supabase";
-import { ClueParamsSchema, CompleteClueSchema } from "../../../../lib/types";
+  withMethodRestriction,
+} from "../../../lib/api";
+import { supabase } from "../../../lib/supabase";
+import { ClueParamsSchema, CompleteClueSchema } from "../../../lib/types";
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+async function unlockHandler(req: VercelRequest, res: VercelResponse) {
   try {
+    // Get clue ID from query params
+    const clueId = req.query.id as string;
+
     // Validate clue ID
-    const validatedParams = ClueParamsSchema.parse({ id: params.id });
-    const { id: clueId } = validatedParams;
+    const validatedParams = ClueParamsSchema.parse({ id: clueId });
+    const { id: validatedClueId } = validatedParams;
 
     // Validate request body
-    const validation = await validateRequestBody(request, CompleteClueSchema);
-    if (!validation.success) {
-      return validation.response;
+    const validatedData = await validateRequestBody(
+      req,
+      res,
+      CompleteClueSchema
+    );
+    if (!validatedData) {
+      return; // Response already sent by validateRequestBody
     }
-    const { userId, password } = validation.data;
+    const { userId, password } = validatedData;
 
     // Get the clue to verify password
     const { data: clue, error: clueError } = await supabase
       .from("clues")
       .select("*")
-      .eq("id", clueId)
+      .eq("id", validatedClueId)
       .single();
 
     if (clueError || !clue) {
-      return createErrorResponse("Clue not found", 404);
+      createErrorResponse(res, "Clue not found", 404);
+      return;
     }
 
     // Simple password verification (in real app, this would be hashed)
     // For now, we'll use the NFC tag ID as the password
     if (password !== clue.nfc_tag_id) {
-      return createErrorResponse("Incorrect password", 400);
+      createErrorResponse(res, "Incorrect password", 400);
+      return;
     }
 
     // Check if already unlocked
@@ -46,11 +53,12 @@ export async function POST(
       .from("user_progress")
       .select("*")
       .eq("user_id", userId)
-      .eq("clue_id", clueId)
+      .eq("clue_id", validatedClueId)
       .single();
 
     if (existingProgress && !progressError) {
-      return createErrorResponse("Clue already unlocked", 400);
+      createErrorResponse(res, "Clue already unlocked", 400);
+      return;
     }
 
     // Create progress entry
@@ -59,7 +67,7 @@ export async function POST(
       .insert([
         {
           user_id: userId,
-          clue_id: clueId,
+          clue_id: validatedClueId,
           unlocked_at: new Date().toISOString(),
         },
       ])
@@ -70,7 +78,8 @@ export async function POST(
       throw new Error("Failed to unlock clue");
     }
 
-    return createSuccessResponse(
+    createSuccessResponse(
+      res,
       {
         id: newProgress.id,
         user_id: newProgress.user_id,
@@ -81,10 +90,13 @@ export async function POST(
     );
   } catch (error) {
     if (error instanceof ZodError) {
-      return createErrorResponse("Validation failed", 400);
+      createErrorResponse(res, "Validation failed", 400);
+      return;
     }
 
     console.error("Unlock clue error:", error);
-    return createErrorResponse("Internal server error", 500);
+    createErrorResponse(res, "Internal server error", 500);
   }
 }
+
+export default withMethodRestriction(["POST"], unlockHandler);
