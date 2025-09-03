@@ -16,7 +16,6 @@ const isRequiresPreviousLocked = async (clue: Clue, userId: string) => {
 
   const numPreviousUnlockedClues = data?.length || 0;
 
-  console.log("numPreviousUnlockedClues", numPreviousUnlockedClues);
   return numPreviousUnlockedClues !== clue.order_index - 1;
 };
 
