@@ -2,7 +2,7 @@
   "version": 2,
   "functions": {
     "server/api/**/*.ts": {
-      "runtime": "nodejs22.x"
+      "runtime": "vercel/node@20.x"
     }
   },
   "rewrites": [
