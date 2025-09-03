@@ -29,6 +29,19 @@ async function unlockHandler(req: VercelRequest, res: VercelResponse) {
     }
     const { userId, password } = validatedData;
 
+    // Check if already unlocked
+    const { data: existingProgress, error: progressError } = await supabase
+      .from("user_progress")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("clue_id", validatedClueId)
+      .single();
+
+    if (existingProgress && !progressError) {
+      createErrorResponse(res, "Clue already unlocked", 400);
+      return;
+    }
+
     // Get the clue to verify password
     const { data: clue, error: clueError } = await supabase
       .from("clues")
@@ -45,19 +58,6 @@ async function unlockHandler(req: VercelRequest, res: VercelResponse) {
     // For now, we'll use the NFC tag ID as the password
     if (password !== clue.nfc_tag_id) {
       createErrorResponse(res, "Incorrect password", 400);
-      return;
-    }
-
-    // Check if already unlocked
-    const { data: existingProgress, error: progressError } = await supabase
-      .from("user_progress")
-      .select("*")
-      .eq("user_id", userId)
-      .eq("clue_id", validatedClueId)
-      .single();
-
-    if (existingProgress && !progressError) {
-      createErrorResponse(res, "Clue already unlocked", 400);
       return;
     }
 

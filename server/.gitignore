@@ -63,3 +63,4 @@ Thumbs.db
 .vercel
 .claude
 public/
+scripts/clues/insert-clues.sql

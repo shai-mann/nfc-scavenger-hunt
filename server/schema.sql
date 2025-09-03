@@ -14,7 +14,8 @@ CREATE TABLE IF NOT EXISTS clues (
     title VARCHAR(255) NOT NULL,
     data JSONB, -- Clue data is stored as raw JSON, to avoid restricting the data structure
     nfc_tag_id VARCHAR(255) NOT NULL, -- This serves as the password for unlocking
-    order_index INTEGER DEFAULT 0
+    order_index INTEGER DEFAULT 0,
+    lock_state VARCHAR(255) DEFAULT 'none'
 );
 
 -- Create user_progress table to track which clues users have unlocked

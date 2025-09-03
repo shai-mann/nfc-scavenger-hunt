@@ -8,7 +8,7 @@
     "lint": "tsc --noEmit",
     "clean": "rm -rf public",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "generate-clues": "node scripts/generate-clue-sql.js"
+    "generate-clues": "node scripts/clues/generate-clue-sql.js"
   },
   "keywords": [
     "nfc",
