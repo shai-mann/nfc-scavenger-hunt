@@ -48,7 +48,6 @@ export = async function handler(req: VercelRequest, res: VercelResponse) {
       .insert([
         {
           name: username,
-          email: `${username}@temp.com`, // Placeholder since we don't collect email
         },
       ])
       .select()
