@@ -3,7 +3,7 @@ import { ZodError } from "zod";
 import { supabase } from "../../lib/supabase";
 import { CreateUserSchema } from "../../lib/types";
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export = async function handler(req: VercelRequest, res: VercelResponse) {
   // Set CORS headers
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -81,4 +81,4 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       error: "Internal server error",
     });
   }
-}
+};

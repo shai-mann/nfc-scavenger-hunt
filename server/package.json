@@ -3,13 +3,12 @@
   "version": "1.0.0",
   "description": "Backend server for NFC Scavenger Hunt app",
   "main": "api/index.ts",
-  "type": "module",
   "scripts": {
-    "build": "tsc --outDir public",
+    "build": "tsc",
     "start": "vercel dev",
     "db:reset": "tsx scripts/reset-db.ts",
     "lint": "tsc --noEmit",
-    "clean": "rm -rf public",
+    "clean": "rm -rf dist",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
