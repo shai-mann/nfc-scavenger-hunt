@@ -16,6 +16,9 @@
     "node",
     "express"
   ],
+  "engines": {
+    "node": "22.x"
+  },
   "author": "Shai Mann-Robison",
   "license": "ISC",
   "dependencies": {
