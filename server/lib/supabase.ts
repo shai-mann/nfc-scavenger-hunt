@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { LockState } from "./types";
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
@@ -34,25 +35,28 @@ export type Database = {
         Row: {
           id: string;
           title: string;
-          description: string | null;
+          description: string;
           nfc_tag_id: string;
           order_index: number;
+          lock_state: LockState;
           created_at: string;
         };
         Insert: {
           id?: string;
           title: string;
-          description?: string | null;
+          description?: string;
           nfc_tag_id: string;
           order_index?: number;
+          lock_state?: LockState;
           created_at?: string;
         };
         Update: {
           id?: string;
           title?: string;
-          description?: string | null;
+          description?: string;
           nfc_tag_id?: string;
           order_index?: number;
+          lock_state?: LockState;
           created_at?: string;
         };
         Relationships: [];

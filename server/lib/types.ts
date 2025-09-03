@@ -45,6 +45,9 @@ export type VerifyCluePasswordRequest = z.infer<
 export type CompleteClueRequest = z.infer<typeof CompleteClueSchema>;
 export type UserProgressParams = z.infer<typeof UserProgressParamsSchema>;
 
+// Lock state types
+export type LockState = "none" | "requires_previous";
+
 // Database models
 export interface User {
   id: string;
@@ -58,6 +61,7 @@ export interface Clue {
   description: string;
   nfc_tag_id: string;
   order_index: number;
+  lock_state: LockState;
   created_at: string;
 }
 

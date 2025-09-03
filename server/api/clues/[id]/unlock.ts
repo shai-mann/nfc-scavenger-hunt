@@ -6,6 +6,7 @@ import {
   validateRequestBody,
   withMethodRestriction,
 } from "../../../lib/api";
+import { isLocked } from "../../../lib/clue-lock-predicates";
 import { supabase } from "../../../lib/supabase";
 import { ClueParamsSchema, CompleteClueSchema } from "../../../lib/types";
 
@@ -61,6 +62,14 @@ async function unlockHandler(req: VercelRequest, res: VercelResponse) {
       return;
     }
 
+    // Check if the clue is locked:
+    const isClueLocked = await isLocked(clue, userId);
+
+    if (isClueLocked) {
+      createErrorResponse(res, "Clue is locked", 400);
+      return;
+    }
+
     // Create progress entry
     const { data: newProgress, error: insertError } = await supabase
       .from("user_progress")
@@ -81,9 +90,6 @@ async function unlockHandler(req: VercelRequest, res: VercelResponse) {
     createSuccessResponse(
       res,
       {
-        id: newProgress.id,
-        user_id: newProgress.user_id,
-        clue_id: newProgress.clue_id,
         unlocked_at: newProgress.unlocked_at,
       },
       201
