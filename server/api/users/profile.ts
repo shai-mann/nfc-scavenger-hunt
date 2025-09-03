@@ -1,46 +1,27 @@
-import { VercelRequest, VercelResponse } from "@vercel/node";
-import { supabase } from "../../lib/supabase";
+import { NextRequest } from "next/server";
+import {
+  createErrorResponse,
+  createSuccessResponse,
+  findUserById,
+  getUserIdFromRequest,
+} from "../../lib/api";
 
-export async function GET(req: VercelRequest, res: VercelResponse) {
-  try {
-    // Simple auth check - get userId from headers or query params
-    const userId =
-      (req.headers["x-user-id"] as string) || (req.query.userId as string);
-
-    if (!userId) {
-      return res.status(401).json({
-        success: false,
-        error: "User ID required",
-      });
-    }
-
-    // Get user profile
-    const { data: user, error } = await supabase
-      .from("users")
-      .select("*")
-      .eq("id", userId)
-      .single();
-
-    if (error || !user) {
-      return res.status(404).json({
-        success: false,
-        error: "User not found",
-      });
-    }
-
-    return res.status(200).json({
-      success: true,
-      data: {
-        id: user.id,
-        username: user.name,
-        created_at: user.created_at,
-      },
-    });
-  } catch (error) {
-    console.error("Get profile error:", error);
-    return res.status(500).json({
-      success: false,
-      error: "Internal server error",
-    });
+export async function GET(request: NextRequest) {
+  // Get user ID from request
+  const userId = getUserIdFromRequest(request);
+  if (!userId) {
+    return createErrorResponse("User ID required", 401);
   }
+
+  // Get user profile
+  const user = await findUserById(userId);
+  if (!user) {
+    return createErrorResponse("User not found", 404);
+  }
+
+  return createSuccessResponse({
+    id: user.id,
+    username: user.name,
+    created_at: user.created_at,
+  });
 }
