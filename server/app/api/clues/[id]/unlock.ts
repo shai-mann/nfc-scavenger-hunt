@@ -1,17 +1,28 @@
-import { VercelRequest, VercelResponse } from "@vercel/node";
+import { NextRequest } from "next/server";
 import { ZodError } from "zod";
+import {
+  createErrorResponse,
+  createSuccessResponse,
+  validateRequestBody,
+} from "../../../../lib/api";
 import { supabase } from "../../../../lib/supabase";
 import { ClueParamsSchema, CompleteClueSchema } from "../../../../lib/types";
 
-export async function POST(req: VercelRequest, res: VercelResponse) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     // Validate clue ID
-    const validatedParams = ClueParamsSchema.parse({ id: req.query.id });
+    const validatedParams = ClueParamsSchema.parse({ id: params.id });
     const { id: clueId } = validatedParams;
 
     // Validate request body
-    const validatedBody = CompleteClueSchema.parse(req.body);
-    const { userId, password } = validatedBody;
+    const validation = await validateRequestBody(request, CompleteClueSchema);
+    if (!validation.success) {
+      return validation.response;
+    }
+    const { userId, password } = validation.data;
 
     // Get the clue to verify password
     const { data: clue, error: clueError } = await supabase
@@ -21,19 +32,13 @@ export async function POST(req: VercelRequest, res: VercelResponse) {
       .single();
 
     if (clueError || !clue) {
-      return res.status(404).json({
-        success: false,
-        error: "Clue not found",
-      });
+      return createErrorResponse("Clue not found", 404);
     }
 
     // Simple password verification (in real app, this would be hashed)
     // For now, we'll use the NFC tag ID as the password
     if (password !== clue.nfc_tag_id) {
-      return res.status(400).json({
-        success: false,
-        error: "Incorrect password",
-      });
+      return createErrorResponse("Incorrect password", 400);
     }
 
     // Check if already unlocked
@@ -45,10 +50,7 @@ export async function POST(req: VercelRequest, res: VercelResponse) {
       .single();
 
     if (existingProgress && !progressError) {
-      return res.status(400).json({
-        success: false,
-        error: "Clue already unlocked",
-      });
+      return createErrorResponse("Clue already unlocked", 400);
     }
 
     // Create progress entry
@@ -68,29 +70,21 @@ export async function POST(req: VercelRequest, res: VercelResponse) {
       throw new Error("Failed to unlock clue");
     }
 
-    return res.status(201).json({
-      success: true,
-      message: "Clue unlocked successfully",
-      data: {
+    return createSuccessResponse(
+      {
         id: newProgress.id,
         user_id: newProgress.user_id,
         clue_id: newProgress.clue_id,
         unlocked_at: newProgress.unlocked_at,
       },
-    });
+      201
+    );
   } catch (error) {
     if (error instanceof ZodError) {
-      return res.status(400).json({
-        success: false,
-        error: "Validation failed",
-        details: error.issues,
-      });
+      return createErrorResponse("Validation failed", 400);
     }
 
     console.error("Unlock clue error:", error);
-    return res.status(500).json({
-      success: false,
-      error: "Internal server error",
-    });
+    return createErrorResponse("Internal server error", 500);
   }
 }

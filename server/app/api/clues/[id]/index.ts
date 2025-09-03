@@ -1,23 +1,26 @@
-import { VercelRequest, VercelResponse } from "@vercel/node";
+import {
+  createErrorResponse,
+  createSuccessResponse,
+  getUserIdFromRequest,
+} from "@/lib/api";
+import { supabase } from "@/lib/supabase";
+import { ClueParamsSchema } from "@/lib/types";
+import { NextRequest } from "next/server";
 import { ZodError } from "zod";
-import { supabase } from "../../../../lib/supabase";
-import { ClueParamsSchema } from "../../../../lib/types";
 
-export async function GET(req: VercelRequest, res: VercelResponse) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    // Simple auth check - get userId from headers or query params
-    const userId =
-      (req.headers["x-user-id"] as string) || (req.query.userId as string);
-
+    // Get user ID from request
+    const userId = getUserIdFromRequest(request);
     if (!userId) {
-      return res.status(401).json({
-        success: false,
-        error: "User ID required",
-      });
+      return createErrorResponse("User ID required", 401);
     }
 
     // Validate clue ID
-    const validatedParams = ClueParamsSchema.parse({ id: req.query.id });
+    const validatedParams = ClueParamsSchema.parse({ id: params.id });
     const { id: clueId } = validatedParams;
 
     // Check if user has unlocked this clue
@@ -29,10 +32,7 @@ export async function GET(req: VercelRequest, res: VercelResponse) {
       .single();
 
     if (progressError || !userProgress) {
-      return res.status(403).json({
-        success: false,
-        error: "Clue not unlocked for this user",
-      });
+      return createErrorResponse("Clue not unlocked for this user", 403);
     }
 
     // Get the clue details
@@ -43,28 +43,16 @@ export async function GET(req: VercelRequest, res: VercelResponse) {
       .single();
 
     if (clueError || !clue) {
-      return res.status(404).json({
-        success: false,
-        error: "Clue not found",
-      });
+      return createErrorResponse("Clue not found", 404);
     }
 
-    return res.status(200).json({
-      success: true,
-      data: clue,
-    });
+    return createSuccessResponse(clue);
   } catch (error) {
     if (error instanceof ZodError) {
-      return res.status(400).json({
-        success: false,
-        error: "Invalid clue ID format",
-      });
+      return createErrorResponse("Invalid clue ID format", 400);
     }
 
     console.error("Get clue error:", error);
-    return res.status(500).json({
-      success: false,
-      error: "Internal server error",
-    });
+    return createErrorResponse("Internal server error", 500);
   }
 }

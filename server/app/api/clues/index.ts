@@ -3,8 +3,7 @@ import {
   createErrorResponse,
   createSuccessResponse,
   getUserIdFromRequest,
-} from "@/lib/api";
-console.log(typeof createErrorResponse);
+} from "../../../lib/api";
 
 export async function GET(request: NextRequest) {
   // Get user ID from request
