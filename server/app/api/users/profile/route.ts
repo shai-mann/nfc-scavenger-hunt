@@ -1,10 +1,10 @@
+import { NextRequest } from "next/server";
 import {
   createErrorResponse,
   createSuccessResponse,
   findUserById,
   getUserIdFromRequest,
-} from "@/lib/api";
-import { NextRequest } from "next/server";
+} from "../../../../lib/api";
 
 export async function GET(request: NextRequest) {
   // Get user ID from request
