@@ -1,41 +1,9 @@
 {
   "version": 2,
-  "functions": {
-    "server/api/**/*.ts": {
-      "runtime": "vercel/node@20.x"
-    }
-  },
-  "rewrites": [
+  "projects": [
     {
-      "source": "/api/(.*)",
-      "destination": "/server/api/$1"
-    }
-  ],
-  "headers": [
-    {
-      "source": "/api/(.*)",
-      "headers": [
-        {
-          "key": "Access-Control-Allow-Origin",
-          "value": "*"
-        },
-        {
-          "key": "Access-Control-Allow-Methods",
-          "value": "GET, POST, PUT, DELETE, OPTIONS"
-        },
-        {
-          "key": "Access-Control-Allow-Headers",
-          "value": "Content-Type, Authorization, x-user-id"
-        },
-        {
-          "key": "Access-Control-Allow-Credentials",
-          "value": "true"
-        },
-        {
-          "key": "Access-Control-Max-Age",
-          "value": "86400"
-        }
-      ]
+      "name": "server",
+      "rootDirectory": "server"
     }
   ]
 }
