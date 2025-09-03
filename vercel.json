@@ -1,16 +1,4 @@
 {
-  "functions": {
-    "server/api/**/*.ts": {
-      "runtime": "@vercel/node"
-    }
-  },
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/server/api/$1"
-    }
-  ],
-  "buildCommand": "cd server && npm run build",
   "headers": [
     {
       "source": "/api/(.*)",
