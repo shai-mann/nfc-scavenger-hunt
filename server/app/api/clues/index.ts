@@ -2,9 +2,9 @@ import { NextRequest } from "next/server";
 import {
   createErrorResponse,
   createSuccessResponse,
-  getUserClues,
   getUserIdFromRequest,
-} from "../../lib/api";
+} from "../../../lib/api";
+console.log(typeof createErrorResponse);
 
 export async function GET(request: NextRequest) {
   // Get user ID from request
@@ -13,11 +13,14 @@ export async function GET(request: NextRequest) {
     return createErrorResponse("User ID required", 401);
   }
 
-  // Get user's unlocked clues
-  const cluesResult = await getUserClues(userId);
-  if (!cluesResult.success) {
-    return createErrorResponse(cluesResult.error, 500);
-  }
+  console.log("userId", userId);
 
-  return createSuccessResponse(cluesResult.data);
+  // Get user's unlocked clues
+  // const cluesResult = await getUserClues(userId);
+  // if (!cluesResult.success) {
+  //   return createErrorResponse(cluesResult.error, 500);
+  // }
+
+  // return createSuccessResponse(cluesResult.data);
+  return createSuccessResponse([]);
 }

@@ -1,7 +1,7 @@
 import { VercelRequest, VercelResponse } from "@vercel/node";
 import { ZodError } from "zod";
-import { supabase } from "../../../lib/supabase";
-import { ClueParamsSchema, CompleteClueSchema } from "../../../lib/types";
+import { supabase } from "../../../../lib/supabase";
+import { ClueParamsSchema, CompleteClueSchema } from "../../../../lib/types";
 
 export async function POST(req: VercelRequest, res: VercelResponse) {
   try {

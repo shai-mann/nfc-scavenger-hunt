@@ -5,8 +5,8 @@ import {
   createUser,
   findUserByUsername,
   validateRequestBody,
-} from "../../lib/api";
-import { CreateUserSchema } from "../../lib/types";
+} from "../../../lib/api";
+import { CreateUserSchema } from "../../../lib/types";
 
 export async function POST(request: NextRequest) {
   // Validate request body
