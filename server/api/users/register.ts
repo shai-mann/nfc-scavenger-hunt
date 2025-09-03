@@ -3,14 +3,7 @@ import { ZodError } from "zod";
 import { supabase } from "../../lib/supabase";
 import { CreateUserSchema } from "../../lib/types";
 
-export = async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== "POST") {
-    return res.status(405).json({
-      success: false,
-      error: "Method not allowed",
-    });
-  }
-
+export async function POST(req: VercelRequest, res: VercelResponse) {
   try {
     const validatedData = CreateUserSchema.parse(req.body);
     const { username } = validatedData;
@@ -71,4 +64,4 @@ export = async function handler(req: VercelRequest, res: VercelResponse) {
       error: "Internal server error",
     });
   }
-};
+}

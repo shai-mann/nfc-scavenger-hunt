@@ -1,21 +1,10 @@
 import { VercelRequest, VercelResponse } from "@vercel/node";
 
-export = async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
-  }
-
-  if (req.method !== "GET") {
-    return res.status(405).json({
-      success: false,
-      error: "Method not allowed",
-    });
-  }
-
+export async function GET(req: VercelRequest, res: VercelResponse) {
   return res.status(200).json({
     status: "OK",
     message: "NFC Scavenger Hunt API is running on Vercel",
     timestamp: new Date().toISOString(),
     version: "2.0.0",
   });
-};
+}

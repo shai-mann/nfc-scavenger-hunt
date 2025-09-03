@@ -3,14 +3,7 @@ import { ZodError } from "zod";
 import { supabase } from "../../../lib/supabase";
 import { ClueParamsSchema, CompleteClueSchema } from "../../../lib/types";
 
-export = async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== "POST") {
-    return res.status(405).json({
-      success: false,
-      error: "Method not allowed",
-    });
-  }
-
+export async function POST(req: VercelRequest, res: VercelResponse) {
   try {
     // Validate clue ID
     const validatedParams = ClueParamsSchema.parse({ id: req.query.id });
@@ -100,4 +93,4 @@ export = async function handler(req: VercelRequest, res: VercelResponse) {
       error: "Internal server error",
     });
   }
-};
+}

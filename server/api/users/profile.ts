@@ -1,14 +1,7 @@
 import { VercelRequest, VercelResponse } from "@vercel/node";
 import { supabase } from "../../lib/supabase";
 
-export = async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== "GET") {
-    return res.status(405).json({
-      success: false,
-      error: "Method not allowed",
-    });
-  }
-
+export async function GET(req: VercelRequest, res: VercelResponse) {
   try {
     // Simple auth check - get userId from headers or query params
     const userId =
@@ -50,4 +43,4 @@ export = async function handler(req: VercelRequest, res: VercelResponse) {
       error: "Internal server error",
     });
   }
-};
+}
