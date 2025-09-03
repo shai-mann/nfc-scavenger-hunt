@@ -280,7 +280,7 @@ export async function getUserClues(
       id,
       title,
       order_index,
-      user_progress (
+      user_progress!left (
         unlocked_at
       )
     `
