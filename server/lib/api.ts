@@ -278,12 +278,13 @@ export async function getUserClues(
       id,
       title,
       order_index,
-      user_progress!left (
+      user_progress (
         unlocked_at
       )
     `
       )
-      .eq("user_progress.user_id", userId);
+      .eq("user_progress.user_id", userId)
+      .order("order_index", { ascending: true });
 
     if (progressError) {
       return { success: false, error: "Failed to fetch user progress" };
