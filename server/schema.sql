@@ -1,58 +1,54 @@
--- NFC Scavenger Hunt Database Schema
-
--- Enable UUID extension
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- NFC Scavenger Hunt Database Schema for Supabase
+-- Run this in your Supabase SQL Editor
 
 -- Create users table
 CREATE TABLE IF NOT EXISTS users (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    username VARCHAR(50) UNIQUE NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
-
--- Create lock state enum
-CREATE TYPE lock_state_enum AS ENUM ('none', 'requires_previous');
 
 -- Create clues table
 CREATE TABLE IF NOT EXISTS clues (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     title VARCHAR(255) NOT NULL,
-    data JSONB,
-    password VARCHAR(255) NOT NULL,
-    lock_state lock_state_enum DEFAULT 'none',
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    order_index INTEGER DEFAULT 0
+    data JSONB, -- Clue data is stored as raw JSON, to avoid restricting the data structure
+    nfc_tag_id VARCHAR(255) NOT NULL, -- This serves as the password for unlocking
+    order_index INTEGER DEFAULT 0,
+    lock_state VARCHAR(255) DEFAULT 'none'
 );
 
--- Create user_progress table to track which clues users have completed
+-- Create user_progress table to track which clues users have unlocked
 CREATE TABLE IF NOT EXISTS user_progress (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
     clue_id UUID REFERENCES clues(id) ON DELETE CASCADE,
-    completed_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    unlocked_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     UNIQUE(user_id, clue_id)
 );
 
--- Sample clues are created by running the create-clues.sql script
--- \i scripts/create-clues.sql
-
 -- Create indexes for better performance
-CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+CREATE INDEX IF NOT EXISTS idx_users_name ON users(name);
 CREATE INDEX IF NOT EXISTS idx_user_progress_user_id ON user_progress(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_progress_clue_id ON user_progress(clue_id);
 CREATE INDEX IF NOT EXISTS idx_clues_order_index ON clues(order_index);
 
--- Function to update updated_at timestamp
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = CURRENT_TIMESTAMP;
-    RETURN NEW;
-END;
-$$ language 'plpgsql';
+-- Enable Row Level Security (RLS) for security
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE clues DISABLE ROW LEVEL SECURITY;
+ALTER TABLE user_progress ENABLE ROW LEVEL SECURITY;
 
--- Triggers to automatically update updated_at
-CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-CREATE TRIGGER update_clues_updated_at BEFORE UPDATE ON clues FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+-- Create policies for public access (since we're using simple auth)
+-- Note: In production, you'd want more restrictive policies
+
+-- Users can read all users (for profile lookups)
+CREATE POLICY "Users can read all users" ON users FOR SELECT USING (true);
+-- Users can insert their own record
+CREATE POLICY "Users can insert their own record" ON users FOR INSERT WITH CHECK (true);
+
+-- Users can read all progress (needed for checking unlocks)
+CREATE POLICY "Users can read all progress" ON user_progress FOR SELECT USING (true);
+-- Users can insert their own progress
+CREATE POLICY "Users can insert progress" ON user_progress FOR INSERT WITH CHECK (true);
+-- Users can read all clues
+CREATE POLICY "Users can read all clues" ON clues FOR SELECT USING (true);

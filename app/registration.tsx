@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { apiClient } from "@/server/lib/api";
 import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -39,19 +40,17 @@ export default function RegistrationPage() {
     setErrorText("");
 
     try {
-      const response = await api.users.register({ username: username.trim() });
-
-      if (response.success) {
+      const response = await apiClient.registerUser({ username: username.trim() });
+      
+      if (response.success && response.data) {
+        // Registration successful, navigate to home
         router.replace("/(tabs)");
       } else {
-        setErrorText("Registration failed. Please try again.");
+        setErrorText(response.error || "Registration failed");
       }
     } catch (error) {
-      if (error instanceof Error) {
-        setErrorText(error.message);
-      } else {
-        setErrorText("Registration failed. Please try again.");
-      }
+      console.error("Registration error:", error);
+      setErrorText("Network error occurred");
     } finally {
       setIsLoading(false);
     }
@@ -133,27 +132,22 @@ export default function RegistrationPage() {
                   Join Bits&apos; Hunt!
                 </Text>
 
-                <View className="flex flex-col w-full items-center gap-1">
-                  <Input
-                    ref={inputRef}
-                    className={cn(
-                      "border-2 border-gray-300 rounded-md p-3 w-full h-12",
-                      errorText && "border-destructive border-2"
-                    )}
-                    placeholder="Enter username"
-                    value={username}
-                    onChangeText={setUsername}
-                    autoCorrect={false}
-                    editable={!isLoading}
-                  />
-
-                  {/* Error Message */}
-                  {errorText ? (
-                    <Text className="text-destructive text-sm font-medium self-start ml-1">
-                      {errorText}
-                    </Text>
-                  ) : null}
-                </View>
+                <Input
+                  ref={inputRef}
+                  className={cn(
+                    "border-2 border-gray-300 rounded-md p-3 w-full h-12",
+                    errorText && "border-destructive border-2"
+                  )}
+                  placeholder="Enter username"
+                  value={username}
+                  onChangeText={setUsername}
+                  autoCorrect={false}
+                />
+                {errorText && (
+                  <Text className="text-destructive text-sm mt-2 text-center">
+                    {errorText}
+                  </Text>
+                )}
               </View>
             </View>
             {/* Spacer to push button down when keyboard is hidden */}
@@ -169,7 +163,7 @@ export default function RegistrationPage() {
               >
                 <Animated.View
                   className={cn(
-                    "bg-primary rounded-md p-3 w-full items-center justify-center flex-row",
+                    "bg-primary rounded-md p-3 w-full items-center justify-center",
                     (username.trim().length === 0 || isLoading) && "opacity-50"
                   )}
                   style={animatedButtonStyle}
@@ -180,7 +174,7 @@ export default function RegistrationPage() {
                     </View>
                   )}
                   <Text className="text-white font-semibold">
-                    {isLoading ? "Registering..." : "Start the Hunt!"}
+                    {isLoading ? "Creating Account..." : "Start the Hunt!"}
                   </Text>
                 </Animated.View>
               </Pressable>

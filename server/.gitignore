@@ -60,3 +60,7 @@ jspm_packages/
 .Trashes
 ehthumbs.db
 Thumbs.db
+.vercel
+.claude
+public/
+scripts/clues/insert-clues.sql

@@ -13,12 +13,12 @@ export const CreateUserSchema = z.object({
 });
 
 export const UserParamsSchema = z.object({
-  id: z.uuid("Invalid user ID format"),
+  id: z.string().uuid("Invalid user ID format"),
 });
 
 // Clue schemas
 export const ClueParamsSchema = z.object({
-  id: z.uuid("Invalid clue ID format"),
+  id: z.string().uuid("Invalid clue ID format"),
 });
 
 export const VerifyCluePasswordSchema = z.object({
@@ -26,13 +26,13 @@ export const VerifyCluePasswordSchema = z.object({
 });
 
 export const CompleteClueSchema = z.object({
-  userId: z.uuid("Invalid user ID format"),
+  userId: z.string().uuid("Invalid user ID format"),
   password: z.string().min(1, "Password is required"),
 });
 
 // Progress schemas
 export const UserProgressParamsSchema = z.object({
-  user_id: z.uuid("Invalid user ID format"),
+  user_id: z.string().uuid("Invalid user ID format"),
 });
 
 // Export types
@@ -44,3 +44,44 @@ export type VerifyCluePasswordRequest = z.infer<
 >;
 export type CompleteClueRequest = z.infer<typeof CompleteClueSchema>;
 export type UserProgressParams = z.infer<typeof UserProgressParamsSchema>;
+
+// Lock state types
+export type LockState = "none" | "requires_previous";
+
+// Database models
+export interface User {
+  id: string;
+  name: string;
+  created_at: string;
+}
+
+export interface Clue {
+  id: string;
+  title: string;
+  description: string;
+  nfc_tag_id: string;
+  order_index: number;
+  lock_state: LockState;
+  created_at: string;
+}
+
+export interface UserProgress {
+  id: string;
+  user_id: string;
+  clue_id: string;
+  unlocked_at: string;
+}
+
+// API Response types
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  message?: string;
+}
+
+export interface ApiError {
+  success: false;
+  error: string;
+  statusCode?: number;
+}
