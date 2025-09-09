@@ -30,6 +30,11 @@ export interface ClueMetadata {
   unlocked_at?: string;
 }
 
+export type HealthCheckResponse = {
+  message: string;
+  timestamp: string;
+};
+
 export interface CreateUserRequest {
   username: string;
 }

@@ -4,6 +4,7 @@ import {
   Clue,
   ClueMetadata,
   CreateUserRequest,
+  HealthCheckResponse,
   User,
 } from "@/types/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -169,8 +170,8 @@ class ApiClient {
   }
 
   // Health check
-  async healthCheck(): Promise<ApiResponse<any>> {
-    return this.makeRequest<any>("/health");
+  async healthCheck(): Promise<ApiResponse<HealthCheckResponse>> {
+    return this.makeRequest<HealthCheckResponse>("/health");
   }
 }
 
