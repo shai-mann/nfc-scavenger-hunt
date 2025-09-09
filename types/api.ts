@@ -14,7 +14,18 @@ export interface User {
 export interface Clue {
   id: string;
   title: string;
-  description: string;
+  data: {
+    text?: string;
+    isCopyable?: boolean;
+    image?: string; // path to the image
+  };
+  order_index: number;
+  unlocked_at?: string;
+}
+
+export interface ClueMetadata {
+  id: string;
+  title: string;
   order_index: number;
   unlocked_at?: string;
 }

@@ -1,5 +1,11 @@
 import { API_CONFIG } from "@/config/api";
-import { ApiResponse, Clue, CreateUserRequest, User } from "@/types/api";
+import {
+  ApiResponse,
+  Clue,
+  ClueMetadata,
+  CreateUserRequest,
+  User,
+} from "@/types/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const USER_ID_KEY = "@user_id";
@@ -113,7 +119,7 @@ class ApiClient {
   }
 
   // Clue endpoints
-  async getUserClues(): Promise<ApiResponse<Clue[]>> {
+  async getUserClues(): Promise<ApiResponse<ClueMetadata[]>> {
     if (!this.userId) {
       return {
         success: false,
@@ -121,7 +127,7 @@ class ApiClient {
         status: 401,
       };
     }
-    return this.makeRequest<Clue[]>("/clues");
+    return this.makeRequest<ClueMetadata[]>("/clues");
   }
 
   async getClue(clueId: string): Promise<ApiResponse<Clue>> {

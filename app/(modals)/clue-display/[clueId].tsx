@@ -93,9 +93,9 @@ export default function ClueDisplayModal() {
   }, [loadClueData]);
 
   const handleCopyText = async () => {
-    if (clue?.description) {
+    if (clue?.data.text) {
       try {
-        Clipboard.setString(clue?.description);
+        Clipboard.setString(clue?.data.text);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       } catch (error) {
@@ -167,13 +167,13 @@ export default function ClueDisplayModal() {
             To find the next Bits...
           </Text>
 
-          {clue.description && (
+          {clue.data.text && (
             <Pressable
               className="p-4 rounded-xl bg-muted"
               onPress={handleCopyText}
             >
               <Text variant="default" className="text-base leading-6 mb-2">
-                {clue.description}
+                {clue.data.text}
               </Text>
               <View className="flex-row items-center gap-1 self-end">
                 <IconSymbol

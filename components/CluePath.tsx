@@ -1,6 +1,7 @@
 import { apiClient } from "@/lib/api-client";
 import { generateSinePath } from "@/lib/generate-sine-path";
 import { cn } from "@/lib/utils";
+import { ClueMetadata } from "@/types/api";
 import { useFocusEffect } from "@react-navigation/native";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
@@ -23,13 +24,6 @@ const STEP = Math.PI / 2;
 const PERIOD = 750; // the "tightness" of the wave
 
 const CLUE_SIZE = DIMENSIONS.width * 0.2;
-
-interface ClueForDisplay {
-  id: string;
-  name: string;
-  description: string;
-  isFound: boolean;
-}
 
 export const CluePath = () => {
   const insets = useSafeAreaInsets();
@@ -57,16 +51,11 @@ export const CluePath = () => {
     refetch,
   } = useQuery({
     queryKey: ["home-page-user-clues"],
-    queryFn: async (): Promise<ClueForDisplay[]> => {
+    queryFn: async (): Promise<ClueMetadata[]> => {
       const response = await apiClient.getUserClues();
 
       if (response.success && response.data) {
-        return response.data.map((clue: any) => ({
-          id: clue.id,
-          name: clue.title,
-          description: clue.title, // Using title as description for now
-          isFound: !!clue.unlocked_at,
-        }));
+        return response.data;
       } else {
         throw new Error(response.error || "Failed to load clues");
       }
@@ -137,7 +126,7 @@ const ClueComponent = ({
   item,
   index,
 }: {
-  item: ClueForDisplay;
+  item: ClueMetadata;
   index: number;
 }) => {
   // offset calculations
@@ -171,26 +160,26 @@ const ClueComponent = ({
       }}
     >
       <Pressable
-        disabled={!item.isFound}
+        disabled={!item.unlocked_at}
         onPress={() => router.push(`/clue-display/${item.id}`)}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
       >
         <Animated.View
           className={cn("rounded-full items-center justify-center", {
-            "bg-primary": item.isFound,
-            "border-2 border-primary border-dashed": !item.isFound,
+            "bg-primary": item.unlocked_at,
+            "border-2 border-primary border-dashed": !item.unlocked_at,
           })}
           style={animatedStyle}
         >
           <View
             className={cn("absolute self-center rounded-full size-1/2", {
-              "bg-primary": !item.isFound,
-              "bg-transparent": item.isFound,
+              "bg-primary": !item.unlocked_at,
+              "bg-transparent": item.unlocked_at,
             })}
           />
           <Text className="font-bold text-white">
-            {item.isFound ? item.name : "???"}
+            {item.unlocked_at ? item.title : "???"}
           </Text>
         </Animated.View>
       </Pressable>
