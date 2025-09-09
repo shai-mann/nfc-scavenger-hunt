@@ -1,12 +1,15 @@
+import { ErrorState } from "@/components/ErrorState";
+import { LoadingState } from "@/components/LoadingState";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { Text } from "@/components/ui/text";
+import { apiClient } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
+import { Clue } from "@/types/api";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useLayoutEffect, useState } from "react";
+import React, { useCallback, useLayoutEffect, useState } from "react";
 import {
   Alert,
-  Image,
   Pressable,
   ScrollView,
   TouchableOpacity,
@@ -19,80 +22,84 @@ import Animated, {
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-// Temporary clue data structure - in a real app, this would come from an API or database
-const TEMP_CLUES = {
-  "1": {
-    id: "1",
-    title: "The Hidden Library",
-    text: "Find the ancient tome hidden behind the third pillar from the entrance. The answer lies within its weathered pages.",
-    isCopyable: true,
-    image: null,
-    bits_description: "Hard-Working Bits",
-  },
-  "2": {
-    id: "2",
-    title: "Secret Garden Path",
-    text: "Follow the stone path that winds through the rose garden. Count the steps and remember the number.",
-    isCopyable: false,
-    image: null,
-    bits_description: "Gay Pride Bits",
-  },
-  "3": {
-    id: "3",
-    title: "The Clock Tower Mystery",
-    text: "At exactly 3:15 PM, the shadow of the clock tower points to a hidden marker. What do you see?",
-    isCopyable: true,
-    image: "https://example.com/clock-tower.jpg", // Placeholder image URL
-    bits_description: "Bee-Loving Bits",
-  },
-  "4": {
-    id: "4",
-    title: "Digital Footprints",
-    text: "Scan the QR code on the student center wall. The digital trail will lead you to your next destination.",
-    isCopyable: true,
-    image: null,
-    bits_description: "Weirdo Bits",
-  },
-};
-
-const IS_CLUE_UNLOCKED = true;
-const IS_USER_REGISTERED = true;
-
 export default function ClueDisplayModal() {
-  useLayoutEffect(() => {
-    // TODO: add a check to see if the user is registered
-    if (!IS_USER_REGISTERED) {
-      // if unregistered, redirect to registration
-      router.replace("/registration");
-    } else if (!IS_CLUE_UNLOCKED) {
-      // if registered but the clue is not unlocked yet, redirect to home
-      // the clue would be unlocked in the clue-finding modal, so it cannot be displayed here
-      // if it is not unlocked.
-      // TODO: make this checked against the server
-      router.replace("/(tabs)");
-    }
-  }, []);
-
-  const { clueId } = useLocalSearchParams<{ clueId: string }>();
+  const { clueId, password } = useLocalSearchParams<{
+    clueId: string;
+    password: string;
+  }>();
   const [copied, setCopied] = useState(false);
+  const [clue, setClue] = useState<Clue | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [loadingMessage, setLoadingMessage] =
+    useState<string>("Loading clue...");
+  const [error, setError] = useState<string>("");
 
-  // Get the clue data - fallback to a default if not found
-  const clue = TEMP_CLUES[clueId as keyof typeof TEMP_CLUES] || {
-    id: clueId,
-    title: "Clue Not Found",
-    text: "This clue could not be found. Please check the clue ID and try again.",
-    isCopyable: false,
-    image: null,
-    bits_description: "Watercolor Bits",
-  };
+  const handleUnlockClue = useCallback(async () => {
+    setLoading(true);
+    setLoadingMessage("Unlocking clue...");
+    if (!clueId || !password) {
+      setError("Missing required parameters");
+    } else {
+      const response = await apiClient.unlockClue(clueId, password);
+      if (response.data && response.success) {
+        setClue(response.data);
+      } else {
+        console.error("Error unlocking clue:", response.error);
+        setError("Clue could not be unlocked");
+      }
+    }
+
+    setLoading(false);
+  }, [clueId, password]);
+
+  const loadClueData = useCallback(async () => {
+    if (!clueId) {
+      setError("No clue ID provided");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setLoadingMessage("Loading clue...");
+      const response = await apiClient.getClue(clueId);
+
+      if (response.success && response.data) {
+        setClue(response.data);
+      } else if (response.error && response.status === 403) {
+        // A forbidden response means the clue is not unlocked, so we will attempt to unlock it
+        handleUnlockClue();
+      } else {
+        console.error("Error loading clue:", response.error);
+        setError("Failed to load clue");
+      }
+    } catch (err) {
+      setError("Network error occurred");
+      console.error("Error loading clue:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [clueId, handleUnlockClue]);
+
+  useLayoutEffect(() => {
+    // Check if user is registered by seeing if apiClient has a userId
+    if (!apiClient.getUserId()) {
+      router.replace("/registration");
+      return;
+    }
+
+    // Load the clue data
+    loadClueData();
+  }, [loadClueData]);
 
   const handleCopyText = async () => {
-    if (clue.isCopyable && clue.text) {
+    if (clue?.description) {
       try {
-        Clipboard.setString(clue.text);
+        Clipboard.setString(clue?.description);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       } catch (error) {
+        console.error("Error copying text to clipboard:", error);
         Alert.alert("Error", "Failed to copy text to clipboard.");
       }
     }
@@ -110,6 +117,26 @@ export default function ClueDisplayModal() {
       transform: [{ scale: scale.value }],
     };
   });
+
+  // Show loading state
+  if (loading) {
+    return (
+      <SafeAreaView className="flex-1 bg-background h-screen">
+        <LoadingState message={loadingMessage} />
+      </SafeAreaView>
+    );
+  }
+
+  //
+
+  // Show error state
+  if (error || !clue) {
+    return (
+      <SafeAreaView className="flex-1 bg-background h-screen">
+        <ErrorState error={error} refetch={loadClueData} />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-background h-screen">
@@ -130,7 +157,7 @@ export default function ClueDisplayModal() {
         {/* Clue ID Display */}
         <View className="bg-muted p-3 rounded-lg mb-6">
           <Text variant="default" className="text-sm opacity-70 text-center">
-            You found {clue.bits_description}!
+            You found {clue.title}!
           </Text>
         </View>
 
@@ -140,47 +167,31 @@ export default function ClueDisplayModal() {
             To find the next Bits...
           </Text>
 
-          {clue.text && (
+          {clue.description && (
             <Pressable
               className="p-4 rounded-xl bg-muted"
               onPress={handleCopyText}
             >
               <Text variant="default" className="text-base leading-6 mb-2">
-                {clue.text}
+                {clue.description}
               </Text>
-              {clue.isCopyable && (
-                <View className="flex-row items-center gap-1 self-end">
-                  <IconSymbol
-                    size={12}
-                    name={copied ? "checkmark" : "doc.on.doc"}
-                    color={copied ? "#34C759" : "#007AFF"}
-                  />
-                  <Text
-                    variant="default"
-                    className={cn("text-xs", {
-                      "text-green-600": copied,
-                      "text-blue-600": !copied,
-                    })}
-                  >
-                    {copied ? "Copied!" : "Copyable"}
-                  </Text>
-                </View>
-              )}
+              <View className="flex-row items-center gap-1 self-end">
+                <IconSymbol
+                  size={12}
+                  name={copied ? "checkmark" : "doc.on.doc"}
+                  color={copied ? "#34C759" : "#007AFF"}
+                />
+                <Text
+                  variant="default"
+                  className={cn("text-xs", {
+                    "text-green-600": copied,
+                    "text-blue-600": !copied,
+                  })}
+                >
+                  {copied ? "Copied!" : "Copyable"}
+                </Text>
+              </View>
             </Pressable>
-          )}
-
-          {clue.image && (
-            <View className="rounded-xl overflow-hidden bg-muted">
-              <Image
-                source={{ uri: clue.image }}
-                className="w-full h-50"
-                resizeMode="cover"
-                // Fallback for when image fails to load
-                onError={() => {
-                  console.log("Image failed to load");
-                }}
-              />
-            </View>
           )}
         </View>
       </ScrollView>

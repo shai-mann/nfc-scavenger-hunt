@@ -7,7 +7,6 @@ export default function ModalsLayout() {
         headerShown: false,
       }}
     >
-      <Stack.Screen name="clue-finding" />
       <Stack.Screen name="clue-display" />
     </Stack>
   );

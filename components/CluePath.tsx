@@ -1,8 +1,10 @@
-import { Clue } from "@/app/(tabs)";
+import { apiClient } from "@/lib/api-client";
 import { generateSinePath } from "@/lib/generate-sine-path";
 import { cn } from "@/lib/utils";
+import { useFocusEffect } from "@react-navigation/native";
+import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Dimensions, Pressable, ScrollView, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -11,6 +13,8 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
+import { ErrorState } from "./ErrorState";
+import { LoadingState } from "./LoadingState";
 import { Text } from "./ui/text";
 
 const DIMENSIONS = Dimensions.get("window");
@@ -20,11 +24,14 @@ const PERIOD = 750; // the "tightness" of the wave
 
 const CLUE_SIZE = DIMENSIONS.width * 0.2;
 
-interface CluePathProps {
-  clues: Clue[];
+interface ClueForDisplay {
+  id: string;
+  name: string;
+  description: string;
+  isFound: boolean;
 }
 
-export const CluePath = ({ clues }: CluePathProps) => {
+export const CluePath = () => {
   const insets = useSafeAreaInsets();
 
   const [contentHeight, setContentHeight] = useState(0);
@@ -42,6 +49,44 @@ export const CluePath = ({ clues }: CluePathProps) => {
       }),
     [contentHeight]
   );
+
+  const {
+    data: clues = [],
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["home-page-user-clues"],
+    queryFn: async (): Promise<ClueForDisplay[]> => {
+      const response = await apiClient.getUserClues();
+
+      if (response.success && response.data) {
+        return response.data.map((clue: any) => ({
+          id: clue.id,
+          name: clue.title,
+          description: clue.title, // Using title as description for now
+          isFound: !!clue.unlocked_at,
+        }));
+      } else {
+        throw new Error(response.error || "Failed to load clues");
+      }
+    },
+  });
+
+  // Refetch when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
+
+  if (isLoading) {
+    return <LoadingState message="Loading your progress..." />;
+  }
+
+  if (error) {
+    return <ErrorState error={error} refetch={refetch} />;
+  }
 
   return (
     <ScrollView className="flex-1 bg-secondary/50">
@@ -88,7 +133,13 @@ export const CluePath = ({ clues }: CluePathProps) => {
   );
 };
 
-const ClueComponent = ({ item, index }: { item: Clue; index: number }) => {
+const ClueComponent = ({
+  item,
+  index,
+}: {
+  item: ClueForDisplay;
+  index: number;
+}) => {
   // offset calculations
   const angle = index * STEP;
   const horizontalOffset = Math.sin(angle) * AMPLITUDE;

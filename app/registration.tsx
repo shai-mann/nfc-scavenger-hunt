@@ -1,11 +1,11 @@
 import Logo from "@/assets/images/DDlogo.png";
 import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
-import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
-import { apiClient } from "@/server/lib/api";
+import { apiClient } from "@/lib/api-client";
 import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import {
   ActivityIndicator,
   Keyboard,
@@ -26,43 +26,38 @@ import Animated, {
 
 export default function RegistrationPage() {
   const [username, setUsername] = useState("");
-  const [errorText, setErrorText] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const inputRef = useRef<any>(null);
 
-  const handleRegistration = async () => {
-    if (username.trim().length === 0) {
-      setErrorText("Please enter a username");
-      return;
-    }
-
-    setIsLoading(true);
-    setErrorText("");
-
-    try {
-      const response = await apiClient.registerUser({ username: username.trim() });
-      
+  const registerMutation = useMutation({
+    mutationFn: async (userData: { username: string }) => {
+      const response = await apiClient.registerUser(userData);
       if (response.success && response.data) {
-        // Registration successful, navigate to home
-        router.replace("/(tabs)");
+        return response.data;
       } else {
-        setErrorText(response.error || "Registration failed");
+        throw new Error(response.error || "Registration failed");
       }
-    } catch (error) {
-      console.error("Registration error:", error);
-      setErrorText("Network error occurred");
-    } finally {
-      setIsLoading(false);
+    },
+    onSuccess: () => {
+      // Registration successful, navigate to home
+      router.replace("/(tabs)");
+    },
+  });
+
+  const handleRegistration = () => {
+    if (username.trim().length === 0) {
+      return; // Let the disabled state handle this
     }
+    registerMutation.mutate({ username: username.trim() });
   };
 
   useEffect(() => {
-    if (errorText) {
-      setTimeout(() => {
-        setErrorText("");
+    if (registerMutation.error) {
+      const timer = setTimeout(() => {
+        registerMutation.reset();
       }, 3000);
+      return () => clearTimeout(timer);
     }
-  }, [errorText]);
+  }, [registerMutation.error, registerMutation.reset]);
 
   const logoTopMargin = useSharedValue(30);
 
@@ -136,16 +131,18 @@ export default function RegistrationPage() {
                   ref={inputRef}
                   className={cn(
                     "border-2 border-gray-300 rounded-md p-3 w-full h-12",
-                    errorText && "border-destructive border-2"
+                    registerMutation.error && "border-destructive border-2"
                   )}
                   placeholder="Enter username"
                   value={username}
                   onChangeText={setUsername}
                   autoCorrect={false}
                 />
-                {errorText && (
+                {registerMutation.error && (
                   <Text className="text-destructive text-sm mt-2 text-center">
-                    {errorText}
+                    {registerMutation.error instanceof Error 
+                      ? registerMutation.error.message 
+                      : "Registration failed"}
                   </Text>
                 )}
               </View>
@@ -159,22 +156,22 @@ export default function RegistrationPage() {
                 onPress={handleRegistration}
                 onPressIn={() => (scale.value = withSpring(0.95))}
                 onPressOut={() => (scale.value = withSpring(1))}
-                disabled={username.trim().length === 0 || isLoading}
+                disabled={username.trim().length === 0 || registerMutation.isPending}
               >
                 <Animated.View
                   className={cn(
                     "bg-primary rounded-md p-3 w-full items-center justify-center",
-                    (username.trim().length === 0 || isLoading) && "opacity-50"
+                    (username.trim().length === 0 || registerMutation.isPending) && "opacity-50"
                   )}
                   style={animatedButtonStyle}
                 >
-                  {isLoading && (
+                  {registerMutation.isPending && (
                     <View className="mr-2">
                       <ActivityIndicator size="small" color="white" />
                     </View>
                   )}
                   <Text className="text-white font-semibold">
-                    {isLoading ? "Creating Account..." : "Start the Hunt!"}
+                    {registerMutation.isPending ? "Creating Account..." : "Start the Hunt!"}
                   </Text>
                 </Animated.View>
               </Pressable>

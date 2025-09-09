@@ -47,7 +47,8 @@
       "router": {},
       "eas": {
         "projectId": "b7b216f4-fb78-4c02-aa28-be52f939e4e4"
-      }
+      },
+      "serverlessUrl": "${SERVERLESS_FUNCTIONS_URL}"
     },
     "fonts": [
       {

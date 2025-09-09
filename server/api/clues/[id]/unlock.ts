@@ -90,7 +90,9 @@ async function unlockHandler(req: VercelRequest, res: VercelResponse) {
     createSuccessResponse(
       res,
       {
-        unlocked_at: newProgress.unlocked_at,
+        title: clue.title,
+        description: clue.description,
+        order_index: clue.order_index,
       },
       201
     );
