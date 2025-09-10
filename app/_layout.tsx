@@ -8,12 +8,12 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 
+import { queryClient, setupUniversalQueryBehavior } from "@/config/api";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { PortalHost } from "@rn-primitives/portal";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { queryClient, setupUniversalQueryBehavior } from "@/config/api";
-import "../global.css";
 import { useEffect } from "react";
+import "../global.css";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -22,10 +22,7 @@ export default function RootLayout() {
   });
 
   // Set up universal query behavior
-  useEffect(() => {
-    const cleanup = setupUniversalQueryBehavior();
-    return cleanup;
-  }, []);
+  useEffect(() => setupUniversalQueryBehavior(), []);
 
   if (!loaded) {
     // Async font loading only occurs in development.

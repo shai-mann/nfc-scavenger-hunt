@@ -1,5 +1,9 @@
+import {
+  QueryClient,
+  focusManager,
+  onlineManager,
+} from "@tanstack/react-query";
 import Constants from "expo-constants";
-import { QueryClient, onlineManager, focusManager } from "@tanstack/react-query";
 import { AppState, AppStateStatus } from "react-native";
 
 // API Configuration for the frontend
@@ -21,8 +25,10 @@ export const queryClient = new QueryClient({
       // Universal retry configuration
       retry: (failureCount, error: any) => {
         // Don't retry on 4xx errors (client errors) like authentication failures
-        if (error?.message?.includes("No user ID") || 
-            (error?.status >= 400 && error?.status < 500)) {
+        if (
+          error?.message?.includes("No user ID") ||
+          (error?.status >= 400 && error?.status < 500)
+        ) {
           return false;
         }
         return failureCount < 3;
@@ -62,8 +68,4 @@ export const setupUniversalQueryBehavior = () => {
     // For now, we rely on the default browser online/offline events
     return () => {};
   });
-
-  return () => {
-    AppState.removeEventListener("change", onAppStateChange);
-  };
 };
