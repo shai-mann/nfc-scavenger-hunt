@@ -61,19 +61,25 @@ class ApiClient {
 
     const headers = {
       "Content-Type": "application/json",
-      ...(this.userId && { "x-user-id": this.userId }),
+      // ...(this.userId && { "x-user-id": this.userId }), // TODO: switch to this pattern for serverless functions?
       ...options.headers,
     };
 
     try {
+      console.log("URL:", url, {
+        ...options,
+        headers,
+      });
       const response = await fetch(url, {
         ...options,
         headers,
       });
 
-      console.log("Response:", response);
+      console.log(response);
 
       const data = await response.json();
+
+      console.log(data);
 
       if (!response.ok) {
         return {
