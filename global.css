@@ -30,7 +30,6 @@
     --chart-5: 27 87% 67%;
   }
 
-  /* TODO: use new palette with dark mode colors - currently using old dark mode colors here */
   .dark:root {
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
