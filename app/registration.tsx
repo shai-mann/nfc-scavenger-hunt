@@ -154,12 +154,13 @@ export default function RegistrationPage() {
                 onPress={handleRegistration}
                 onPressIn={() => (scale.value = withSpring(0.95))}
                 onPressOut={() => (scale.value = withSpring(1))}
-                disabled={username.trim().length === 0 || isPending}
+                disabled={username.trim().length === 0 || isPending || !!error}
               >
                 <Animated.View
                   className={cn(
                     "bg-primary rounded-md p-3 w-full flex flex-row items-center justify-center",
-                    (username.trim().length === 0 || isPending) && "opacity-50"
+                    (username.trim().length === 0 || isPending || !!error) &&
+                      "opacity-50"
                   )}
                   style={animatedButtonStyle}
                 >
