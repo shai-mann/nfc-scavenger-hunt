@@ -33,11 +33,7 @@ class ApiClient {
 
   async setUserId(userId: string) {
     this.userId = userId;
-    try {
-      await AsyncStorage.setItem(USER_ID_KEY, userId);
-    } catch (error) {
-      console.error("Error storing user ID:", error);
-    }
+    await AsyncStorage.setItem(USER_ID_KEY, userId);
   }
 
   getUserId(): string | null {
@@ -66,30 +62,22 @@ class ApiClient {
     };
 
     try {
-      console.log("URL:", url, {
-        ...options,
-        headers,
-      });
       const response = await fetch(url, {
         ...options,
         headers,
       });
 
-      console.log(response);
-
-      const data = await response.json();
-
-      console.log(data);
+      const rawData = await response.json();
 
       if (!response.ok) {
         return {
           success: false,
-          error: data.error || "An error occurred",
+          error: rawData.error || "An error occurred",
           status: response.status,
         };
       }
 
-      return { data, status: response.status, success: true };
+      return { data: rawData.data, status: response.status, success: true };
     } catch (error) {
       console.error("API request failed:", error);
       return {
@@ -109,7 +97,16 @@ class ApiClient {
 
     // If registration successful, store the user ID
     if (response.success && response.data) {
-      await this.setUserId(response.data.id);
+      try {
+        await this.setUserId(response.data.id);
+      } catch (error) {
+        console.error("Error storing user ID:", error);
+        return {
+          success: false,
+          error: "Failed to register user",
+          status: 500,
+        };
+      }
     }
 
     return response;

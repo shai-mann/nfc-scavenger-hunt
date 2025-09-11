@@ -34,13 +34,14 @@ export default function RegistrationPage() {
       if (response.success && response.data) {
         return response.data;
       } else {
-        throw new Error(response.error || "Registration failed");
+        throw new Error(response.error || "An error occurred");
       }
     },
     onSuccess: () => {
       // Registration successful, navigate to home
       router.replace("/(tabs)");
     },
+    retry: false,
   });
 
   const handleRegistration = () => {
