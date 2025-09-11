@@ -28,7 +28,7 @@ export default function RegistrationPage() {
   const [username, setUsername] = useState("");
   const inputRef = useRef<any>(null);
 
-  const registerMutation = useMutation({
+  const { isPending, error, reset, mutate } = useMutation({
     mutationFn: async (userData: { username: string }) => {
       const response = await apiClient.registerUser(userData);
       if (response.success && response.data) {
@@ -47,17 +47,13 @@ export default function RegistrationPage() {
     if (username.trim().length === 0) {
       return; // Let the disabled state handle this
     }
-    registerMutation.mutate({ username: username.trim() });
+    mutate({ username: username.trim() });
   };
 
   useEffect(() => {
-    if (registerMutation.error) {
-      const timer = setTimeout(() => {
-        registerMutation.reset();
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [registerMutation.error, registerMutation.reset]);
+    // Reset error state when username changes
+    reset();
+  }, [reset, username]);
 
   const logoTopMargin = useSharedValue(30);
 
@@ -127,24 +123,26 @@ export default function RegistrationPage() {
                   Join Bits&apos; Hunt!
                 </Text>
 
-                <Input
-                  ref={inputRef}
-                  className={cn(
-                    "border-2 border-gray-300 rounded-md p-3 w-full h-12",
-                    registerMutation.error && "border-destructive border-2"
+                <View className="w-full flex flex-col items-center relative">
+                  {error && (
+                    <Text className="text-destructive text-sm px-1 text-center self-start absolute top-[-20px] left-0">
+                      {error instanceof Error
+                        ? error.message
+                        : "Registration failed"}
+                    </Text>
                   )}
-                  placeholder="Enter username"
-                  value={username}
-                  onChangeText={setUsername}
-                  autoCorrect={false}
-                />
-                {registerMutation.error && (
-                  <Text className="text-destructive text-sm mt-2 text-center">
-                    {registerMutation.error instanceof Error
-                      ? registerMutation.error.message
-                      : "Registration failed"}
-                  </Text>
-                )}
+                  <Input
+                    ref={inputRef}
+                    className={cn(
+                      "border-2 border-gray-300 rounded-md p-3 w-full h-12",
+                      error && "border-destructive border-2"
+                    )}
+                    placeholder="Enter username"
+                    value={username}
+                    onChangeText={setUsername}
+                    autoCorrect={false}
+                  />
+                </View>
               </View>
             </View>
             {/* Spacer to push button down when keyboard is hidden */}
@@ -156,28 +154,22 @@ export default function RegistrationPage() {
                 onPress={handleRegistration}
                 onPressIn={() => (scale.value = withSpring(0.95))}
                 onPressOut={() => (scale.value = withSpring(1))}
-                disabled={
-                  username.trim().length === 0 || registerMutation.isPending
-                }
+                disabled={username.trim().length === 0 || isPending}
               >
                 <Animated.View
                   className={cn(
-                    "bg-primary rounded-md p-3 w-full items-center justify-center",
-                    (username.trim().length === 0 ||
-                      registerMutation.isPending) &&
-                      "opacity-50"
+                    "bg-primary rounded-md p-3 w-full flex flex-row items-center justify-center",
+                    (username.trim().length === 0 || isPending) && "opacity-50"
                   )}
                   style={animatedButtonStyle}
                 >
-                  {registerMutation.isPending && (
+                  {isPending && (
                     <View className="mr-2">
                       <ActivityIndicator size="small" color="white" />
                     </View>
                   )}
                   <Text className="text-white font-semibold">
-                    {registerMutation.isPending
-                      ? "Creating Account..."
-                      : "Start the Hunt!"}
+                    {isPending ? "Creating Account..." : "Start the Hunt!"}
                   </Text>
                 </Animated.View>
               </Pressable>
