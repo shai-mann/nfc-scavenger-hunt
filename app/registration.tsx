@@ -1,11 +1,11 @@
 import Logo from "@/assets/images/DDlogo.png";
 import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
-import { cn } from "@/lib/utils";
 import { apiClient } from "@/lib/api-client";
+import { cn } from "@/lib/utils";
+import { useMutation } from "@tanstack/react-query";
 import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
 import {
   ActivityIndicator,
   Keyboard,
@@ -140,8 +140,8 @@ export default function RegistrationPage() {
                 />
                 {registerMutation.error && (
                   <Text className="text-destructive text-sm mt-2 text-center">
-                    {registerMutation.error instanceof Error 
-                      ? registerMutation.error.message 
+                    {registerMutation.error instanceof Error
+                      ? registerMutation.error.message
                       : "Registration failed"}
                   </Text>
                 )}
@@ -156,12 +156,16 @@ export default function RegistrationPage() {
                 onPress={handleRegistration}
                 onPressIn={() => (scale.value = withSpring(0.95))}
                 onPressOut={() => (scale.value = withSpring(1))}
-                disabled={username.trim().length === 0 || registerMutation.isPending}
+                disabled={
+                  username.trim().length === 0 || registerMutation.isPending
+                }
               >
                 <Animated.View
                   className={cn(
                     "bg-primary rounded-md p-3 w-full items-center justify-center",
-                    (username.trim().length === 0 || registerMutation.isPending) && "opacity-50"
+                    (username.trim().length === 0 ||
+                      registerMutation.isPending) &&
+                      "opacity-50"
                   )}
                   style={animatedButtonStyle}
                 >
@@ -171,7 +175,9 @@ export default function RegistrationPage() {
                     </View>
                   )}
                   <Text className="text-white font-semibold">
-                    {registerMutation.isPending ? "Creating Account..." : "Start the Hunt!"}
+                    {registerMutation.isPending
+                      ? "Creating Account..."
+                      : "Start the Hunt!"}
                   </Text>
                 </Animated.View>
               </Pressable>
