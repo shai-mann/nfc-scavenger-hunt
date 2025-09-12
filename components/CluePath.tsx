@@ -179,7 +179,7 @@ const ClueComponent = ({
             })}
           />
           <Text className="font-bold text-white">
-            {item.unlocked_at ? item.title : "???"}
+            {item.unlocked_at ? item.order_index : "???"}
           </Text>
         </Animated.View>
       </Pressable>
