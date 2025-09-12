@@ -139,7 +139,6 @@ export default function RegistrationPage() {
                       error && "border-destructive border-2"
                     )}
                     placeholder="Enter username"
-                    value={username}
                     onChangeText={setUsername}
                     autoCorrect={false}
                   />
