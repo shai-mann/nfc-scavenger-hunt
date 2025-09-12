@@ -1,11 +1,13 @@
 import Logo from "@/assets/images/DDlogo.png";
 import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
+import { apiClient } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
-import { apiClient } from "@/server/lib/api";
+import { useMutation } from "@tanstack/react-query";
 import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -24,43 +26,35 @@ import Animated, {
 
 export default function RegistrationPage() {
   const [username, setUsername] = useState("");
-  const [errorText, setErrorText] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const inputRef = useRef<any>(null);
 
-  const handleRegistration = async () => {
-    if (username.trim().length === 0) {
-      setErrorText("Please enter a username");
-      return;
-    }
-
-    setIsLoading(true);
-    setErrorText("");
-
-    try {
-      const response = await apiClient.registerUser({ username: username.trim() });
-      
+  const { isPending, error, reset, mutate } = useMutation({
+    mutationFn: async (userData: { username: string }) => {
+      const response = await apiClient.registerUser(userData);
       if (response.success && response.data) {
-        // Registration successful, navigate to home
-        router.replace("/(tabs)");
+        return response.data;
       } else {
-        setErrorText(response.error || "Registration failed");
+        throw new Error(response.error || "An error occurred");
       }
-    } catch (error) {
-      console.error("Registration error:", error);
-      setErrorText("Network error occurred");
-    } finally {
-      setIsLoading(false);
+    },
+    onSuccess: () => {
+      // Registration successful, navigate to home
+      router.replace("/(tabs)");
+    },
+    retry: false,
+  });
+
+  const handleRegistration = () => {
+    if (username.trim().length === 0) {
+      return; // Let the disabled state handle this
     }
+    mutate({ username: username.trim() });
   };
 
   useEffect(() => {
-    if (errorText) {
-      setTimeout(() => {
-        setErrorText("");
-      }, 3000);
-    }
-  }, [errorText]);
+    // Reset error state when username changes
+    reset();
+  }, [reset, username]);
 
   const logoTopMargin = useSharedValue(30);
 
@@ -130,22 +124,25 @@ export default function RegistrationPage() {
                   Join Bits&apos; Hunt!
                 </Text>
 
-                <Input
-                  ref={inputRef}
-                  className={cn(
-                    "border-2 border-gray-300 rounded-md p-3 w-full h-12",
-                    errorText && "border-destructive border-2"
+                <View className="w-full flex flex-col items-center relative">
+                  {error && (
+                    <Text className="text-destructive text-sm px-1 text-center self-start absolute top-[-20px] left-0">
+                      {error instanceof Error
+                        ? error.message
+                        : "Registration failed"}
+                    </Text>
                   )}
-                  placeholder="Enter username"
-                  value={username}
-                  onChangeText={setUsername}
-                  autoCorrect={false}
-                />
-                {errorText && (
-                  <Text className="text-destructive text-sm mt-2 text-center">
-                    {errorText}
-                  </Text>
-                )}
+                  <Input
+                    ref={inputRef}
+                    className={cn(
+                      "border-2 border-gray-300 rounded-md p-3 w-full h-12",
+                      error && "border-destructive border-2"
+                    )}
+                    placeholder="Enter username"
+                    onChangeText={setUsername}
+                    autoCorrect={false}
+                  />
+                </View>
               </View>
             </View>
             {/* Spacer to push button down when keyboard is hidden */}
@@ -157,17 +154,23 @@ export default function RegistrationPage() {
                 onPress={handleRegistration}
                 onPressIn={() => (scale.value = withSpring(0.95))}
                 onPressOut={() => (scale.value = withSpring(1))}
-                disabled={username.trim().length === 0 || isLoading}
+                disabled={username.trim().length === 0 || isPending || !!error}
               >
                 <Animated.View
                   className={cn(
-                    "bg-primary rounded-md p-3 w-full items-center justify-center",
-                    (username.trim().length === 0 || isLoading) && "opacity-50"
+                    "bg-primary rounded-md p-3 w-full flex flex-row items-center justify-center",
+                    (username.trim().length === 0 || isPending || !!error) &&
+                      "opacity-50"
                   )}
                   style={animatedButtonStyle}
                 >
+                  {isPending && (
+                    <View className="mr-2">
+                      <ActivityIndicator size="small" color="white" />
+                    </View>
+                  )}
                   <Text className="text-white font-semibold">
-                    {isLoading ? "Creating Account..." : "Start the Hunt!"}
+                    {isPending ? "Creating Account..." : "Start the Hunt!"}
                   </Text>
                 </Animated.View>
               </Pressable>

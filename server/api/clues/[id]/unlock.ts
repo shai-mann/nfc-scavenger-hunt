@@ -71,7 +71,7 @@ async function unlockHandler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Create progress entry
-    const { data: newProgress, error: insertError } = await supabase
+    const { error: insertError } = await supabase
       .from("user_progress")
       .insert([
         {
@@ -90,7 +90,9 @@ async function unlockHandler(req: VercelRequest, res: VercelResponse) {
     createSuccessResponse(
       res,
       {
-        unlocked_at: newProgress.unlocked_at,
+        title: clue.title,
+        description: clue.description,
+        order_index: clue.order_index,
       },
       201
     );

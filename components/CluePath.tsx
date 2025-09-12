@@ -1,8 +1,11 @@
-import { Clue } from "@/app/(tabs)";
+import { apiClient } from "@/lib/api-client";
 import { generateSinePath } from "@/lib/generate-sine-path";
 import { cn } from "@/lib/utils";
+import { ClueMetadata } from "@/types/api";
+import { useFocusEffect } from "@react-navigation/native";
+import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Dimensions, Pressable, ScrollView, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -11,6 +14,8 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
+import { ErrorState } from "./ErrorState";
+import { LoadingState } from "./LoadingState";
 import { Text } from "./ui/text";
 
 const DIMENSIONS = Dimensions.get("window");
@@ -20,11 +25,7 @@ const PERIOD = 750; // the "tightness" of the wave
 
 const CLUE_SIZE = DIMENSIONS.width * 0.2;
 
-interface CluePathProps {
-  clues: Clue[];
-}
-
-export const CluePath = ({ clues }: CluePathProps) => {
+export const CluePath = () => {
   const insets = useSafeAreaInsets();
 
   const [contentHeight, setContentHeight] = useState(0);
@@ -42,6 +43,39 @@ export const CluePath = ({ clues }: CluePathProps) => {
       }),
     [contentHeight]
   );
+
+  const {
+    data: clues = [],
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["home-page-user-clues"],
+    queryFn: async (): Promise<ClueMetadata[]> => {
+      const response = await apiClient.getUserClues();
+
+      if (response.success && response.data) {
+        return response.data;
+      } else {
+        throw new Error(response.error || "Failed to load clues");
+      }
+    },
+  });
+
+  // Refetch when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
+
+  if (isLoading) {
+    return <LoadingState message="Loading your progress..." />;
+  }
+
+  if (error) {
+    return <ErrorState error={error} refetch={refetch} />;
+  }
 
   return (
     <ScrollView className="flex-1 bg-secondary/50">
@@ -88,7 +122,13 @@ export const CluePath = ({ clues }: CluePathProps) => {
   );
 };
 
-const ClueComponent = ({ item, index }: { item: Clue; index: number }) => {
+const ClueComponent = ({
+  item,
+  index,
+}: {
+  item: ClueMetadata;
+  index: number;
+}) => {
   // offset calculations
   const angle = index * STEP;
   const horizontalOffset = Math.sin(angle) * AMPLITUDE;
@@ -120,26 +160,26 @@ const ClueComponent = ({ item, index }: { item: Clue; index: number }) => {
       }}
     >
       <Pressable
-        disabled={!item.isFound}
+        disabled={!item.unlocked_at}
         onPress={() => router.push(`/clue-display/${item.id}`)}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
       >
         <Animated.View
           className={cn("rounded-full items-center justify-center", {
-            "bg-primary": item.isFound,
-            "border-2 border-primary border-dashed": !item.isFound,
+            "bg-primary": item.unlocked_at,
+            "border-2 border-primary border-dashed": !item.unlocked_at,
           })}
           style={animatedStyle}
         >
           <View
             className={cn("absolute self-center rounded-full size-1/2", {
-              "bg-primary": !item.isFound,
-              "bg-transparent": item.isFound,
+              "bg-primary": !item.unlocked_at,
+              "bg-transparent": item.unlocked_at,
             })}
           />
           <Text className="font-bold text-white">
-            {item.isFound ? item.name : "???"}
+            {item.unlocked_at ? item.order_index : "???"}
           </Text>
         </Animated.View>
       </Pressable>

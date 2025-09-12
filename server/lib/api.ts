@@ -21,12 +21,10 @@ export function withMethodRestriction(
   };
 }
 
-// Get the base URL - in production this will be your deployed URL
+// Get the base URL from environment variables
 const getBaseUrl = () => {
-  if (process.env.NODE_ENV === "development") {
-    return "http://localhost:3000"; // For local development
-  }
-  return "https://your-app-name.vercel.app"; // Replace with your actual Vercel URL
+  // Use SERVERLESS_FUNCTIONS_URL from environment variables
+  return process.env.SERVERLESS_FUNCTIONS_URL || "http://localhost:3000";
 };
 
 const BASE_URL = getBaseUrl();

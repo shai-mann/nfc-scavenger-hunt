@@ -1,35 +1,29 @@
-import React from 'react';
-import {
-  View,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-} from 'react-native';
-import { ThemedView } from '@/components/ThemedView';
-import { ThemedText } from '@/components/ThemedText';
-import { IconSymbol } from '@/components/ui/IconSymbol';
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
+import React from "react";
+import { ScrollView, StyleSheet, View } from "react-native";
 
 // Sample leaderboard data
 const sampleLeaderboard = [
-  { rank: 1, username: 'ScavengerKing', score: 1250, clues: 8 },
-  { rank: 2, username: 'HuntMaster', score: 1100, clues: 7 },
-  { rank: 3, username: 'ClueFinder', score: 950, clues: 6 },
-  { rank: 4, username: 'AdventureSeeker', score: 800, clues: 5 },
-  { rank: 5, username: 'PuzzleSolver', score: 650, clues: 4 },
-  { rank: 6, username: 'TagHunter', score: 500, clues: 3 },
-  { rank: 7, username: 'MysteryLover', score: 350, clues: 2 },
-  { rank: 8, username: 'NewExplorer', score: 200, clues: 1 },
+  { rank: 1, username: "ScavengerKing", score: 1250, clues: 8 },
+  { rank: 2, username: "HuntMaster", score: 1100, clues: 7 },
+  { rank: 3, username: "ClueFinder", score: 950, clues: 6 },
+  { rank: 4, username: "AdventureSeeker", score: 800, clues: 5 },
+  { rank: 5, username: "PuzzleSolver", score: 650, clues: 4 },
+  { rank: 6, username: "TagHunter", score: 500, clues: 3 },
+  { rank: 7, username: "MysteryLover", score: 350, clues: 2 },
+  { rank: 8, username: "NewExplorer", score: 200, clues: 1 },
 ];
 
 export default function LeaderboardPage() {
   const getRankIcon = (rank: number) => {
     switch (rank) {
       case 1:
-        return '🥇';
+        return "🥇";
       case 2:
-        return '🥈';
+        return "🥈";
       case 3:
-        return '🥉';
+        return "🥉";
       default:
         return `#${rank}`;
     }
@@ -38,13 +32,13 @@ export default function LeaderboardPage() {
   const getRankColor = (rank: number) => {
     switch (rank) {
       case 1:
-        return '#FFD700'; // Gold
+        return "#FFD700"; // Gold
       case 2:
-        return '#C0C0C0'; // Silver
+        return "#C0C0C0"; // Silver
       case 3:
-        return '#CD7F32'; // Bronze
+        return "#CD7F32"; // Bronze
       default:
-        return '#666';
+        return "#666";
     }
   };
 
@@ -59,15 +53,21 @@ export default function LeaderboardPage() {
         </ThemedText>
       </View>
 
-      <ScrollView style={styles.leaderboardContainer} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.leaderboardContainer}
+        showsVerticalScrollIndicator={false}
+      >
         {sampleLeaderboard.map((player) => (
           <View key={player.rank} style={styles.playerRow}>
             <View style={styles.rankContainer}>
-              <ThemedText type="defaultSemiBold" style={[styles.rank, { color: getRankColor(player.rank) }]}>
+              <ThemedText
+                type="defaultSemiBold"
+                style={[styles.rank, { color: getRankColor(player.rank) }]}
+              >
                 {getRankIcon(player.rank)}
               </ThemedText>
             </View>
-            
+
             <View style={styles.playerInfo}>
               <ThemedText type="defaultSemiBold" style={styles.username}>
                 {player.username}
@@ -76,7 +76,7 @@ export default function LeaderboardPage() {
                 {player.clues} clues found
               </ThemedText>
             </View>
-            
+
             <View style={styles.scoreContainer}>
               <ThemedText type="defaultSemiBold" style={styles.score}>
                 {player.score}
@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingHorizontal: 20,
     paddingBottom: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
   title: {
     fontSize: 32,
@@ -121,21 +121,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   playerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: 16,
     paddingHorizontal: 16,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: "#f8f8f8",
     borderRadius: 12,
     marginBottom: 12,
   },
   rankContainer: {
     width: 50,
-    alignItems: 'center',
+    alignItems: "center",
   },
   rank: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   playerInfo: {
     flex: 1,
@@ -150,25 +150,25 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   scoreContainer: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   score: {
     fontSize: 20,
-    color: '#007AFF',
-    fontWeight: 'bold',
+    color: "#007AFF",
+    fontWeight: "bold",
   },
   scoreLabel: {
     fontSize: 12,
     opacity: 0.6,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
   },
   footer: {
     padding: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
   footerText: {
     fontSize: 14,
     opacity: 0.6,
-    textAlign: 'center',
+    textAlign: "center",
   },
 });
