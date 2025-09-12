@@ -57,7 +57,7 @@ class ApiClient {
 
     const headers = {
       "Content-Type": "application/json",
-      // ...(this.userId && { "x-user-id": this.userId }), // TODO: switch to this pattern for serverless functions?
+      ...(this.userId && { "x-user-id": this.userId }),
       ...options.headers,
     };
 
