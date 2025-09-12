@@ -44,7 +44,7 @@ export default function ClueDisplayModal() {
       if (response.data && response.success) {
         setClue(response.data);
       } else {
-        console.error("Error unlocking clue:", response.error);
+        console.error("Error unlocking clue:", response.error, response);
         setError("Clue could not be unlocked");
       }
     }
