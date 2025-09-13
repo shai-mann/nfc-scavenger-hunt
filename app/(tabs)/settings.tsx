@@ -1,279 +1,269 @@
-import React, { useState } from 'react';
+import { ErrorState } from "@/components/ErrorState";
+import { Button } from "@/components/ui/button";
+import { IconSymbol } from "@/components/ui/IconSymbol";
+import { Input } from "@/components/ui/input";
+import { Text } from "@/components/ui/text";
+import { apiClient } from "@/lib/api-client";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { router } from "expo-router";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import {
-  View,
-  StyleSheet,
+  ActivityIndicator,
+  Alert,
   ScrollView,
   TouchableOpacity,
-  Switch,
-  Alert,
-} from 'react-native';
-import { ThemedView } from '@/components/ThemedView';
-import { ThemedText } from '@/components/ThemedText';
-import { IconSymbol } from '@/components/ui/IconSymbol';
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SettingsPage() {
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [soundEnabled, setSoundEnabled] = useState(true);
-  const [hapticEnabled, setHapticEnabled] = useState(true);
-  const [darkModeEnabled, setDarkModeEnabled] = useState(false);
-
-  const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: () => {
-            // Here you would handle logout logic
-            console.log('Logout pressed');
-          },
-        },
-      ]
-    );
-  };
-
-  const handleResetProgress = () => {
-    Alert.alert(
-      'Reset Progress',
-      'This will reset all your progress, clues, and scores. This action cannot be undone.',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Reset',
-          style: 'destructive',
-          onPress: () => {
-            // Here you would handle reset logic
-            console.log('Reset progress pressed');
-          },
-        },
-      ]
-    );
-  };
-
-  const SettingItem = ({ 
-    icon, 
-    title, 
-    subtitle, 
-    onPress, 
-    showSwitch = false, 
-    switchValue = false, 
-    onSwitchChange = () => {},
-    showArrow = true 
-  }) => (
-    <TouchableOpacity 
-      style={styles.settingItem} 
-      onPress={onPress}
-      disabled={showSwitch}
-    >
-      <View style={styles.settingIcon}>
-        <IconSymbol size={24} name={icon} color="#007AFF" />
-      </View>
-      
-      <View style={styles.settingContent}>
-        <ThemedText type="defaultSemiBold" style={styles.settingTitle}>
-          {title}
-        </ThemedText>
-        {subtitle && (
-          <ThemedText type="default" style={styles.settingSubtitle}>
-            {subtitle}
-          </ThemedText>
-        )}
-      </View>
-      
-      {showSwitch ? (
-        <Switch
-          value={switchValue}
-          onValueChange={onSwitchChange}
-          trackColor={{ false: '#e0e0e0', true: '#007AFF' }}
-          thumbColor={switchValue ? '#fff' : '#f4f3f4'}
-        />
-      ) : showArrow ? (
-        <IconSymbol size={20} name="chevron.right" color="#c0c0c0" />
-      ) : null}
-    </TouchableOpacity>
+  const [isEditingUsername, setIsEditingUsername] = useState(false);
+  const [newUsername, setNewUsername] = useState("");
+  const [currentUser, setCurrentUser] = useState<{ username: string } | null>(
+    null
   );
+
+  // Check if user is registered and redirect if not
+  useLayoutEffect(() => {
+    if (!apiClient.getUserId()) {
+      router.replace("/registration");
+      return;
+    }
+  }, []);
+
+  // Fetch user profile
+  const {
+    data: userProfile,
+    refetch: refetchProfile,
+    isLoading: isLoadingProfile,
+    error: profileError,
+  } = useQuery({
+    queryKey: ["user-profile"],
+    queryFn: async () => {
+      const response = await apiClient.getUserProfile();
+      if (response.success && response.data) {
+        return response.data;
+      }
+      throw new Error(response.error || "Failed to load user profile");
+    },
+  });
+
+  useEffect(() => {
+    if (userProfile) {
+      setCurrentUser({ username: userProfile.username });
+      setNewUsername(userProfile.username);
+    }
+  }, [userProfile]);
+
+  // Username update mutation (stubbed for now)
+  const { mutate: updateUsername, isPending: isUpdatingUsername } = useMutation(
+    {
+      mutationFn: async (username: string) => {
+        // TODO: Implement actual API call when endpoint exists
+        console.log("Would update username to:", username);
+        return { username };
+      },
+      onSuccess: (updatedUser) => {
+        setCurrentUser(updatedUser);
+        setIsEditingUsername(false);
+        Alert.alert("Success", "Username updated successfully!");
+        refetchProfile();
+      },
+      onError: (error) => {
+        console.error("Failed to update username:", error);
+        Alert.alert("Error", "Failed to update username. Please try again.");
+      },
+    }
+  );
+
+  const handleUsernameUpdate = () => {
+    if (newUsername.trim().length === 0) {
+      Alert.alert("Error", "Username cannot be empty");
+      return;
+    }
+    if (newUsername.trim() === currentUser?.username) {
+      setIsEditingUsername(false);
+      return;
+    }
+    updateUsername(newUsername.trim());
+  };
+
+  const handleProfilePictureUpload = () => {
+    Alert.alert("Profile Picture", "Profile picture upload coming soon!", [
+      { text: "OK" },
+    ]);
+    // TODO: Implement actual profile picture upload when API endpoint exists
+    console.log("Profile picture upload requested");
+  };
+
+  const handleBugReport = () => {
+    Alert.alert(
+      "Bug Report",
+      "Bug reporting feature coming soon! For now, please contact support directly.",
+      [{ text: "OK" }]
+    );
+    // TODO: Implement actual bug reporting when API endpoint exists
+    console.log("Bug report requested");
+  };
+
+  if (profileError) {
+    return (
+      <SafeAreaView className="flex-1 bg-background">
+        <ErrorState error={profileError} refetch={refetchProfile} />
+      </SafeAreaView>
+    );
+  }
 
   return (
-    <ThemedView style={styles.container}>
-      <View style={styles.header}>
-        <ThemedText type="defaultSemiBold" style={styles.title}>
+    <SafeAreaView className="flex-1 bg-background">
+      <View className="flex flex-row justify-between items-center px-5 py-2 border-b border-border">
+        <Text variant="h1" className="text-2xl font-semibold">
           Settings
-        </ThemedText>
+        </Text>
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.section}>
-          <ThemedText type="defaultSemiBold" style={styles.sectionTitle}>
-            Preferences
-          </ThemedText>
-          
-          <SettingItem
-            icon="bell.fill"
-            title="Notifications"
-            subtitle="Get notified about new clues and updates"
-            showSwitch={true}
-            switchValue={notificationsEnabled}
-            onSwitchChange={setNotificationsEnabled}
-            showArrow={false}
-          />
-          
-          <SettingItem
-            icon="speaker.wave.2.fill"
-            title="Sound Effects"
-            subtitle="Play sounds when finding clues"
-            showSwitch={true}
-            switchValue={soundEnabled}
-            onSwitchChange={setSoundEnabled}
-            showArrow={false}
-          />
-          
-          <SettingItem
-            icon="iphone.radiowaves.left.and.right"
-            title="Haptic Feedback"
-            subtitle="Feel vibrations when interacting"
-            showSwitch={true}
-            switchValue={hapticEnabled}
-            onSwitchChange={setHapticEnabled}
-            showArrow={false}
-          />
-          
-          <SettingItem
-            icon="moon.fill"
-            title="Dark Mode"
-            subtitle="Use dark theme for the app"
-            showSwitch={true}
-            switchValue={darkModeEnabled}
-            onSwitchChange={setDarkModeEnabled}
-            showArrow={false}
-          />
+      <ScrollView
+        className="flex-1 px-5 py-6"
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        {/* Profile Section */}
+        <View className="mb-8">
+          <Text
+            variant="h3"
+            className="text-lg font-semibold mb-4 text-muted-foreground"
+          >
+            PROFILE
+          </Text>
+
+          {/* Profile Picture */}
+          <TouchableOpacity
+            onPress={handleProfilePictureUpload}
+            className="bg-muted p-4 rounded-xl mb-4 flex-row items-center"
+          >
+            <View className="w-16 h-16 bg-primary/10 rounded-full mr-4 items-center justify-center">
+              <IconSymbol size={32} name="person.fill" color="#AD8AD1" />
+            </View>
+            <View className="flex-1">
+              <Text variant="default" className="font-semibold mb-1">
+                Profile Picture
+              </Text>
+              <Text variant="default" className="text-muted-foreground text-sm">
+                Tap to upload a new photo
+              </Text>
+            </View>
+            <IconSymbol size={16} name="chevron.right" color="#999" />
+          </TouchableOpacity>
+
+          {/* Username */}
+          <TouchableOpacity
+            className="bg-muted p-4 rounded-xl mb-4"
+            onPress={() => setIsEditingUsername(true)}
+          >
+            <View className="flex-row items-center justify-between mb-2">
+              <Text variant="default" className="font-semibold">
+                Username
+              </Text>
+              {!isEditingUsername && (
+                <TouchableOpacity
+                  onPress={() => setIsEditingUsername(true)}
+                  className="p-1"
+                >
+                  <IconSymbol size={16} name="pencil" color="#AD8AD1" />
+                </TouchableOpacity>
+              )}
+            </View>
+
+            {isEditingUsername ? (
+              <View className="flex flex-col gap-y-3">
+                <Input
+                  value={newUsername}
+                  onChangeText={setNewUsername}
+                  className="bg-background border border-border rounded-md p-3"
+                  placeholder="Enter new username"
+                  autoFocus={true}
+                />
+                <View className="flex flex-row justify-between gap-x-2">
+                  <Button
+                    onPress={handleUsernameUpdate}
+                    disabled={isUpdatingUsername}
+                    className="flex-1"
+                  >
+                    {isUpdatingUsername && (
+                      <ActivityIndicator size="small" color="white" />
+                    )}
+                    <Text>{isUpdatingUsername ? "Saving..." : "Save"}</Text>
+                  </Button>
+                  <Button
+                    onPress={() => {
+                      setIsEditingUsername(false);
+                      setNewUsername(currentUser?.username || "");
+                    }}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    <Text>Cancel</Text>
+                  </Button>
+                </View>
+              </View>
+            ) : (
+              <Text variant="default" className="text-muted-foreground">
+                {currentUser?.username ||
+                  (isLoadingProfile ? "Loading..." : "No username found")}
+              </Text>
+            )}
+          </TouchableOpacity>
         </View>
 
-        <View style={styles.section}>
-          <ThemedText type="defaultSemiBold" style={styles.sectionTitle}>
-            Account
-          </ThemedText>
-          
-          <SettingItem
-            icon="person.fill"
-            title="Profile"
-            subtitle="Edit your username and preferences"
-            onPress={() => console.log('Profile pressed')}
-          />
-          
-          <SettingItem
-            icon="trophy.fill"
-            title="Achievements"
-            subtitle="View your badges and accomplishments"
-            onPress={() => console.log('Achievements pressed')}
-          />
-          
-          <SettingItem
-            icon="chart.bar.fill"
-            title="Statistics"
-            subtitle="See your hunting statistics"
-            onPress={() => console.log('Statistics pressed')}
-          />
+        {/* Support Section */}
+        <View className="mb-8">
+          <Text
+            variant="h3"
+            className="text-lg font-semibold mb-4 text-muted-foreground"
+          >
+            SUPPORT
+          </Text>
+
+          <TouchableOpacity
+            onPress={handleBugReport}
+            className="bg-muted p-4 rounded-xl flex-row items-center"
+          >
+            <View className="w-10 h-10 bg-primary/10 rounded-full mr-4 items-center justify-center">
+              <IconSymbol
+                size={20}
+                name="exclamationmark.triangle.fill"
+                color="#AD8AD1"
+              />
+            </View>
+            <View className="flex-1">
+              <Text variant="default" className="font-semibold mb-1">
+                Report a Bug
+              </Text>
+              <Text variant="default" className="text-muted-foreground text-sm">
+                Help us improve the app
+              </Text>
+            </View>
+            <IconSymbol size={16} name="chevron.right" color="#999" />
+          </TouchableOpacity>
         </View>
 
-        <View style={styles.section}>
-          <ThemedText type="defaultSemiBold" style={styles.sectionTitle}>
-            Game
-          </ThemedText>
-          
-          <SettingItem
-            icon="arrow.clockwise"
-            title="Reset Progress"
-            subtitle="Start fresh with a new adventure"
-            onPress={handleResetProgress}
-          />
-          
-          <SettingItem
-            icon="questionmark.circle.fill"
-            title="Help & Tutorial"
-            subtitle="Learn how to play the game"
-            onPress={() => console.log('Help pressed')}
-          />
-          
-          <SettingItem
-            icon="info.circle.fill"
-            title="About"
-            subtitle="App version and information"
-            onPress={() => console.log('About pressed')}
-          />
-        </View>
-
-        <View style={styles.section}>
-          <SettingItem
-            icon="rectangle.portrait.and.arrow.right"
-            title="Logout"
-            subtitle="Sign out of your account"
-            onPress={handleLogout}
-            showArrow={false}
-          />
+        {/* Note about logout */}
+        <View className="bg-muted/50 p-4 rounded-xl">
+          <View className="flex-row items-center mb-2">
+            <IconSymbol size={16} name="info.circle" color="#666" />
+            <Text
+              variant="default"
+              className="ml-2 font-semibold text-muted-foreground"
+            >
+              Logout Functionality
+            </Text>
+          </View>
+          <Text variant="default" className="text-muted-foreground text-sm">
+            Logout functionality is disabled since each account is linked to a
+            single device.
+          </Text>
         </View>
       </ScrollView>
-    </ThemedView>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    paddingTop: 60,
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-  },
-  title: {
-    fontSize: 32,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-  section: {
-    marginBottom: 32,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    marginBottom: 16,
-    opacity: 0.8,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
-  settingItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    backgroundColor: '#f8f8f8',
-    borderRadius: 12,
-    marginBottom: 12,
-  },
-  settingIcon: {
-    width: 40,
-    alignItems: 'center',
-  },
-  settingContent: {
-    flex: 1,
-    marginLeft: 16,
-  },
-  settingTitle: {
-    fontSize: 16,
-    marginBottom: 2,
-  },
-  settingSubtitle: {
-    fontSize: 14,
-    opacity: 0.6,
-  },
-});
