@@ -5,10 +5,17 @@ import {
 } from "@tanstack/react-query";
 import { AppState, AppStateStatus } from "react-native";
 
+if (
+  !process.env.EXPO_PUBLIC_SERVERLESS_FUNCTIONS_URL ||
+  !process.env.EXPO_PUBLIC_BUG_REPORT_FORM
+) {
+  throw new Error("Missing environment variables");
+}
+
 // API Configuration for the frontend
 export const API_CONFIG = {
   // Use the environment variable from .env file
-  baseUrl: process.env.EXPO_PUBLIC_SERVERLESS_FUNCTIONS_URL!,
+  baseUrl: process.env.EXPO_PUBLIC_SERVERLESS_FUNCTIONS_URL,
 };
 
 // Query Client configuration with universal offline/retry support

@@ -10,6 +10,7 @@ import React, { useEffect, useLayoutEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Linking,
   ScrollView,
   TouchableOpacity,
   View,
@@ -98,13 +99,7 @@ export default function SettingsPage() {
   };
 
   const handleBugReport = () => {
-    Alert.alert(
-      "Bug Report",
-      "Bug reporting feature coming soon! For now, please contact support directly.",
-      [{ text: "OK" }]
-    );
-    // TODO: Implement actual bug reporting when API endpoint exists
-    console.log("Bug report requested");
+    Linking.openURL(process.env.EXPO_PUBLIC_BUG_REPORT_FORM || "");
   };
 
   return (
