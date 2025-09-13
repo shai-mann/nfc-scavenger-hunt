@@ -44,14 +44,14 @@ ALTER TABLE user_progress ENABLE ROW LEVEL SECURITY;
 
 -- Users can read all users (for profile lookups)
 CREATE POLICY "Users can read all users" ON users FOR SELECT USING (true);
--- Users can insert their own record
-CREATE POLICY "Users can insert their own record" ON users FOR INSERT WITH CHECK (true);
+-- Anyone can create a record (register a new user)
+CREATE POLICY "Anyone can insert a new user" ON users FOR INSERT WITH CHECK (true);
 -- Users can update their own record
-CREATE POLICY "Users can update their own record" ON users FOR UPDATE WITH CHECK (true);
+CREATE POLICY "Users can update their own record" ON users FOR UPDATE USING (id = auth.uid()) WITH CHECK (id = auth.uid());
 
--- Users can read all progress (needed for checking unlocks)
+-- Users can read all progress (needed for leaderboard checks)
 CREATE POLICY "Users can read all progress" ON user_progress FOR SELECT USING (true);
 -- Users can insert their own progress
-CREATE POLICY "Users can insert progress" ON user_progress FOR INSERT WITH CHECK (true);
--- Users can read unlocked clues
-CREATE POLICY "Users can read unlocked clues" ON clues FOR SELECT USING 
+CREATE POLICY "Users can insert their own progress" ON user_progress FOR INSERT WITH CHECK (userId = auth.uid());
+-- Users can read all clues
+CREATE POLICY "Users can read all clues" ON clues FOR SELECT USING (true)
