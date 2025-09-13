@@ -43,6 +43,10 @@ async function updateProfileHandler(req: VercelRequest, res: VercelResponse) {
 
   const validatedData = await validateRequestBody(req, res, UpdateUserSchema);
   if (!validatedData) {
+    res.status(400).json({
+      success: false,
+      error: "Username is improperly formatted",
+    });
     return; // Response already sent by validateRequestBody
   }
   const { username } = validatedData;
