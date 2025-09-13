@@ -1,6 +1,7 @@
 import Logo from "@/assets/images/DDlogo.png";
 import { CluePath } from "@/components/CluePath";
 import { Text } from "@/components/ui/text";
+import { router } from "expo-router";
 import { BookOpen } from "lucide-react-native";
 import React from "react";
 import { Image, TouchableOpacity, View } from "react-native";
@@ -24,7 +25,10 @@ export default function HomePage() {
         </Text>
 
         {/* Rules button, floating right */}
-        <TouchableOpacity className="absolute right-5 top-2 p-2">
+        <TouchableOpacity 
+          className="absolute right-5 top-2 p-2"
+          onPress={() => router.push("/(modals)/rules")}
+        >
           <BookOpen size={20} color="#AD8AD1" />
         </TouchableOpacity>
       </View>
