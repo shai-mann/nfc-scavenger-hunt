@@ -60,7 +60,7 @@ async function profileHandler(req: VercelRequest, res: VercelResponse) {
   switch (req.method) {
     case "GET":
       return getProfileHandler(req, res);
-    case "POST":
+    case "PATCH":
       return updateProfileHandler(req, res);
     default:
       createErrorResponse(res, "Method not allowed", 405);
@@ -68,4 +68,4 @@ async function profileHandler(req: VercelRequest, res: VercelResponse) {
   }
 }
 
-export default withMethodRestriction(["GET", "POST"], profileHandler);
+export default withMethodRestriction(["GET", "PATCH"], profileHandler);
