@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS clues (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     title VARCHAR(255) NOT NULL,
+    bits_name VARCHAR(255) NOT NULL,
     data JSONB, -- Clue data is stored as raw JSON, to avoid restricting the data structure
     nfc_tag_id VARCHAR(255) NOT NULL, -- This serves as the password for unlocking
     order_index INTEGER DEFAULT 0,

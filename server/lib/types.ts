@@ -58,6 +58,7 @@ export interface User {
 export interface Clue {
   id: string;
   title: string;
+  bits_name: string;
   description: string;
   nfc_tag_id: string;
   order_index: number;
