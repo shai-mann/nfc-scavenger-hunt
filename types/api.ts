@@ -14,6 +14,7 @@ export interface User {
 export interface Clue {
   id: string;
   title: string;
+  bits_name: string;
   data: {
     text?: string;
     isCopyable?: boolean;

@@ -2,6 +2,7 @@
   {
     "id": "ed077b47-88cf-42a0-8869-ca1d91ff4a39",
     "title": "The Hidden Library",
+    "bits_name": "Bee-Lovin' Bits",
     "data": {
       "text": "Example Text for the first clue",
       "isCopyable": true
@@ -12,6 +13,7 @@
   {
     "id": "89392397-65b6-47e1-ba78-83446bcd9ef3",
     "title": "Secret Garden Path",
+    "bits_name": "Green-Thumb Bits",
     "data": {
       "text": "Example Text for the second clue",
       "isCopyable": false
@@ -22,6 +24,7 @@
   {
     "id": "babf0130-7e4d-44fa-b555-b33960aea27b",
     "title": "The Clock Tower Mystery",
+    "bits_name": "Horloge Bits",
     "data": {
       "text": "Example Text for the third clue",
       "isCopyable": true

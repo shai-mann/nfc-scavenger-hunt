@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS clues (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     title VARCHAR(255) NOT NULL,
+    bits_name VARCHAR(255) NOT NULL,
     data JSONB, -- Clue data is stored as raw JSON, to avoid restricting the data structure
     nfc_tag_id VARCHAR(255) NOT NULL, -- This serves as the password for unlocking
     order_index INTEGER DEFAULT 0,
@@ -43,12 +44,14 @@ ALTER TABLE user_progress ENABLE ROW LEVEL SECURITY;
 
 -- Users can read all users (for profile lookups)
 CREATE POLICY "Users can read all users" ON users FOR SELECT USING (true);
--- Users can insert their own record
-CREATE POLICY "Users can insert their own record" ON users FOR INSERT WITH CHECK (true);
+-- Anyone can create a record (register a new user)
+CREATE POLICY "Anyone can insert a new user" ON users FOR INSERT WITH CHECK (true);
+-- Users can update their own record
+CREATE POLICY "Users can update their own record" ON users FOR UPDATE USING (true);
 
--- Users can read all progress (needed for checking unlocks)
+-- Users can read all progress (needed for leaderboard checks)
 CREATE POLICY "Users can read all progress" ON user_progress FOR SELECT USING (true);
 -- Users can insert their own progress
-CREATE POLICY "Users can insert progress" ON user_progress FOR INSERT WITH CHECK (true);
+CREATE POLICY "Users can insert their own progress" ON user_progress FOR INSERT WITH CHECK (true);
 -- Users can read all clues
-CREATE POLICY "Users can read all clues" ON clues FOR SELECT USING (true);
+CREATE POLICY "Users can read all clues" ON clues FOR SELECT USING (true)

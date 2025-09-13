@@ -35,6 +35,7 @@ export type Database = {
         Row: {
           id: string;
           title: string;
+          bits_name: string;
           description: string;
           nfc_tag_id: string;
           order_index: number;
@@ -44,6 +45,7 @@ export type Database = {
         Insert: {
           id?: string;
           title: string;
+          bits_name?: string;
           description?: string;
           nfc_tag_id: string;
           order_index?: number;
@@ -53,6 +55,7 @@ export type Database = {
         Update: {
           id?: string;
           title?: string;
+          bits_name?: string;
           description?: string;
           nfc_tag_id?: string;
           order_index?: number;
