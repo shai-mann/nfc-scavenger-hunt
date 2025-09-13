@@ -8,25 +8,25 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 const RULES_DATA = [
   <>
-    This hunt is{" "}
+    The first person to scan all clues and find the Creator of the Hunt will be
+    crowned the victor, and{" "}
     <Text variant="default" className="font-semibold">
-      not affiliated with Datadog officially
-    </Text>{" "}
-    - I&apos;m just some random person in the Boston office with spare time.
+      given a prize!
+    </Text>
   </>,
   <>
     All clues are NFC tags. When you find a clue,{" "}
     <Text variant="default" className="font-semibold">
       scan the card
     </Text>{" "}
-    to unlock it and receive the clue for the next Bits.
+    to unlock it.
   </>,
   <>
     Cards should{" "}
     <Text variant="default" className="font-semibold">
       not be removed
     </Text>{" "}
-    from their spots. When you find one, scan it and leave it!
+    from their spots. Scan it and leave it!
   </>,
   <>
     All clues are hidden{" "}
@@ -35,13 +35,6 @@ const RULES_DATA = [
     </Text>
     . They are never outside of the building, nor are they in the basement,
     lobby, or Foundation room.
-  </>,
-  <>
-    The first person to scan all clues and find the Creator of the Hunt will be
-    crowned the victor, and{" "}
-    <Text variant="default" className="font-semibold">
-      given a prize!
-    </Text>
   </>,
   <>
     Cards will{" "}
@@ -69,6 +62,21 @@ export default function RulesModal() {
   const handleBugReport = () => {
     Linking.openURL(process.env.EXPO_PUBLIC_BUG_REPORT_FORM || "");
   };
+
+  const bugReportRule = (
+    <>
+      Most of all, I hope you enjoy this scavenger hunt! If you find any bugs,
+      please report them{" "}
+      <Text
+        variant="default"
+        className="font-semibold"
+        onPress={handleBugReport}
+      >
+        here
+      </Text>{" "}
+      or on the Settings page.
+    </>
+  );
 
   return (
     <SafeAreaView className="flex-1 bg-background">
@@ -98,7 +106,7 @@ export default function RulesModal() {
               created. Find all 13 clues and find me, to win a prize!
             </Text>
           </View>
-          {RULES_DATA.map((rule, index) => (
+          {RULES_DATA.concat(bugReportRule).map((rule, index) => (
             <View
               key={index}
               className={cn(
@@ -121,20 +129,14 @@ export default function RulesModal() {
             </View>
           ))}
         </View>
+
         <Text
           variant="default"
-          className="text-base leading-6 font-light mx-auto mt-4 mb-8"
+          className="text-base leading-6 font-light text-muted-foreground mt-4 mb-8"
         >
-          Most of all, I hope you enjoy this scavenger hunt! If you find any
-          bugs, please report them{" "}
-          <Text
-            variant="default"
-            className="font-semibold"
-            onPress={handleBugReport}
-          >
-            here
-          </Text>
-          .
+          <Text className="underline text-muted-foreground">Disclaimer</Text>:
+          This hunt is not officially affiliated with Datadog - I&apos;m just a
+          Datadog with some spare time!
         </Text>
       </ScrollView>
     </SafeAreaView>
