@@ -3,7 +3,7 @@ import { Text } from "@/components/ui/text";
 import { cn } from "@/lib/utils";
 import { router } from "expo-router";
 import React from "react";
-import { ScrollView, TouchableOpacity, View } from "react-native";
+import { Linking, ScrollView, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const RULES_DATA = [
@@ -66,6 +66,10 @@ export default function RulesModal() {
     router.back();
   };
 
+  const handleBugReport = () => {
+    Linking.openURL(process.env.EXPO_PUBLIC_BUG_REPORT_FORM || "");
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-background">
       <View className="flex flex-row justify-between items-center px-5 py-2 border-b border-border">
@@ -121,7 +125,16 @@ export default function RulesModal() {
           variant="default"
           className="text-base leading-6 font-light mx-auto mt-4 mb-8"
         >
-          Most of all, I hope you enjoy this scavenger hunt!
+          Most of all, I hope you enjoy this scavenger hunt! If you find any
+          bugs, please report them{" "}
+          <Text
+            variant="default"
+            className="font-semibold"
+            onPress={handleBugReport}
+          >
+            here
+          </Text>
+          .
         </Text>
       </ScrollView>
     </SafeAreaView>
