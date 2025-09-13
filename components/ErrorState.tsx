@@ -11,7 +11,9 @@ export const ErrorState = ({
   return (
     <View className="flex-1 bg-white flex flex-col items-center justify-center">
       <Text className="text-destructive text-center px-4">
-        {error instanceof Error ? error.message : "An error occurred"}
+        {error instanceof Error || Object.hasOwn(error, "message")
+          ? error.message
+          : "An error occurred"}
       </Text>
       <TouchableOpacity
         onPress={() => refetch?.()}

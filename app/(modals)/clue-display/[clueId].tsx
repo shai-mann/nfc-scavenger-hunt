@@ -133,7 +133,7 @@ export default function ClueDisplayModal() {
   if (error || !clue) {
     return (
       <SafeAreaView className="flex-1 bg-background h-screen">
-        <ErrorState error={error} refetch={loadClueData} />
+        <ErrorState error={{ message: error }} refetch={loadClueData} />
       </SafeAreaView>
     );
   }
