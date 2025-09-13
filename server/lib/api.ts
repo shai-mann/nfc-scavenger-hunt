@@ -152,10 +152,7 @@ export async function updateUser(
       .select()
       .single();
 
-    console.log("updateUser", updatedUser, error);
-
     if (error) {
-      console.error(error);
       return { success: false, error: "Failed to update user" };
     }
 
