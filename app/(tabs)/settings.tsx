@@ -1,4 +1,3 @@
-import { ErrorState } from "@/components/ErrorState";
 import { Button } from "@/components/ui/button";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { Input } from "@/components/ui/input";
@@ -14,9 +13,14 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 export default function SettingsPage() {
+  const insets = useSafeAreaInsets();
+
   const [isEditingUsername, setIsEditingUsername] = useState(false);
   const [newUsername, setNewUsername] = useState("");
   const [currentUser, setCurrentUser] = useState<{ username: string } | null>(
@@ -35,8 +39,7 @@ export default function SettingsPage() {
   const {
     data: userProfile,
     refetch: refetchProfile,
-    isLoading: isLoadingProfile,
-    error: profileError,
+    isPending: isPendingProfile,
   } = useQuery({
     queryKey: ["user-profile"],
     queryFn: async () => {
@@ -59,9 +62,11 @@ export default function SettingsPage() {
   const { mutate: updateUsername, isPending: isUpdatingUsername } = useMutation(
     {
       mutationFn: async (username: string) => {
-        // TODO: Implement actual API call when endpoint exists
-        console.log("Would update username to:", username);
-        return { username };
+        const response = await apiClient.updateUserProfile({ username });
+        if (response.success && response.data) {
+          return response.data;
+        }
+        throw new Error(response.error || "Failed to update username");
       },
       onSuccess: (updatedUser) => {
         setCurrentUser(updatedUser);
@@ -71,7 +76,7 @@ export default function SettingsPage() {
       },
       onError: (error) => {
         console.error("Failed to update username:", error);
-        Alert.alert("Error", "Failed to update username. Please try again.");
+        Alert.alert("Error", error.message);
       },
     }
   );
@@ -106,14 +111,6 @@ export default function SettingsPage() {
     console.log("Bug report requested");
   };
 
-  if (profileError) {
-    return (
-      <SafeAreaView className="flex-1 bg-background">
-        <ErrorState error={profileError} refetch={refetchProfile} />
-      </SafeAreaView>
-    );
-  }
-
   return (
     <SafeAreaView className="flex-1 bg-background">
       <View className="flex flex-row justify-between items-center px-5 py-2 border-b border-border">
@@ -123,7 +120,7 @@ export default function SettingsPage() {
       </View>
 
       <ScrollView
-        className="flex-1 px-5 py-6"
+        className="flex-1 px-5 pt-6 mb-20"
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
@@ -209,7 +206,9 @@ export default function SettingsPage() {
             ) : (
               <Text variant="default" className="text-muted-foreground">
                 {currentUser?.username ||
-                  (isLoadingProfile ? "Loading..." : "No username found")}
+                  (isPendingProfile
+                    ? "Loading..."
+                    : "No username found. Please report a bug")}
               </Text>
             )}
           </TouchableOpacity>
@@ -263,6 +262,28 @@ export default function SettingsPage() {
             single device.
           </Text>
         </View>
+
+        {/* Debug Section (Development only) */}
+        {__DEV__ && (
+          <View className="bg-muted/50 p-4 rounded-xl mt-8">
+            <Text variant="default" className="text-muted-foreground text-sm">
+              Debug Section
+            </Text>
+            <Text variant="default" className="text-muted-foreground text-sm">
+              User ID: {apiClient.getUserId()}
+            </Text>
+            <TouchableOpacity
+              onPress={async () => {
+                await apiClient.clearUserId();
+                router.replace("/registration");
+              }}
+            >
+              <Text variant="default" className="text-muted-foreground text-sm">
+                Clear Async Storage
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

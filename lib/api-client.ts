@@ -124,6 +124,23 @@ class ApiClient {
     return this.makeRequest<User>("/users/profile");
   }
 
+  async updateUserProfile(
+    user: Partial<Omit<User, "id" | "created_at">>
+  ): Promise<ApiResponse<User>> {
+    if (!this.userId) {
+      return {
+        success: false,
+        error: "No user ID available",
+        status: 401,
+      };
+    }
+
+    return this.makeRequest<User>("/users/profile", {
+      method: "PATCH",
+      body: JSON.stringify(user),
+    });
+  }
+
   // Clue endpoints
   async getUserClues(): Promise<ApiResponse<ClueMetadata[]>> {
     if (!this.userId) {
