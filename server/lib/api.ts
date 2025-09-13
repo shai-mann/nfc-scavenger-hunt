@@ -1,7 +1,7 @@
 import { VercelRequest, VercelResponse } from "@vercel/node";
 import { ZodError, ZodSchema } from "zod";
 import { supabase } from "./supabase";
-import { ApiResponse, Clue, CreateUserRequest, User } from "./types";
+import { ApiResponse, Clue, CreateUserRequest, User, UserRank } from "./types";
 
 // Method restriction helper for Vercel Functions
 export function withMethodRestriction(
@@ -205,6 +205,177 @@ export async function getUserClues(
     return { success: true, data: clues };
   } catch {
     return { success: false, error: "Failed to fetch user progress" };
+  }
+}
+
+// Leaderboard functions
+
+// Helper function to calculate consecutive clues for a user
+export async function getConsecutiveClues(userId: string): Promise<{
+  consecutive: number;
+  total: number;
+}> {
+  try {
+    // Get all user progress ordered by clue order
+    const { data: progress, error } = await supabase
+      .from("user_progress")
+      .select(
+        `
+        clue_id,
+        clues!inner (
+          order_index
+        )
+      `
+      )
+      .eq("user_id", userId)
+      .order("clues.order_index", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching user progress:", error);
+      return { consecutive: 0, total: 0 };
+    }
+
+    if (!progress || progress.length === 0) {
+      return { consecutive: 0, total: 0 };
+    }
+
+    // Sort by order_index to ensure correct order
+    const sortedProgress = progress.sort(
+      (a, b) => a.clues.order_index - b.clues.order_index
+    );
+
+    // Calculate consecutive clues starting from index 0
+    let consecutive = 0;
+    for (let i = 0; i < sortedProgress.length; i++) {
+      if (sortedProgress[i].clues.order_index === consecutive) {
+        consecutive++;
+      } else {
+        break;
+      }
+    }
+
+    return {
+      consecutive,
+      total: progress.length,
+    };
+  } catch (error) {
+    console.error("Error calculating consecutive clues:", error);
+    return { consecutive: 0, total: 0 };
+  }
+}
+
+// Get leaderboard data
+export async function getLeaderboard(): Promise<{
+  success: boolean;
+  data?: UserRank[];
+  error?: string;
+}> {
+  try {
+    // Get all users
+    const { data: users, error: usersError } = await supabase
+      .from("users")
+      .select("id, name");
+
+    if (usersError) {
+      return { success: false, error: "Failed to fetch users" };
+    }
+
+    if (!users || users.length === 0) {
+      return { success: true, data: [] };
+    }
+
+    // Calculate stats for each user
+    // TODO: this is really inefficient, we should batch this query instead
+    const userStats: {
+      username: string;
+      consecutiveClues: number;
+      totalClues: number;
+    }[] = [];
+
+    for (const user of users) {
+      const stats = await getConsecutiveClues(user.id);
+      userStats.push({
+        username: user.name,
+        consecutiveClues: stats.consecutive,
+        totalClues: stats.total,
+      });
+    }
+
+    // Sort by consecutive clues (desc), then by total clues (desc), then by username (asc)
+    userStats.sort((a, b) => {
+      if (a.consecutiveClues !== b.consecutiveClues) {
+        return b.consecutiveClues - a.consecutiveClues;
+      }
+      if (a.totalClues !== b.totalClues) {
+        return b.totalClues - a.totalClues;
+      }
+      return a.username.localeCompare(b.username);
+    });
+
+    // Add ranks
+    const leaderboard: UserRank[] = userStats.map((user, index) => ({
+      ...user,
+      rank: index + 1,
+    }));
+
+    return { success: true, data: leaderboard };
+  } catch (error) {
+    console.error("Error generating leaderboard:", error);
+    return { success: false, error: "Failed to generate leaderboard" };
+  }
+}
+
+// Get user rank
+export async function getUserRank(userId: string): Promise<{
+  success: boolean;
+  data?: UserRank;
+  error?: string;
+}> {
+  try {
+    // Get leaderboard to determine rank
+    const leaderboardResult = await getLeaderboard();
+    if (!leaderboardResult.success || !leaderboardResult.data) {
+      return {
+        success: false,
+        error: leaderboardResult.error || "Failed to get leaderboard",
+      };
+    }
+
+    // Find user by ID to get their username
+    const user = await findUserById(userId);
+    if (!user) {
+      return { success: false, error: "User not found" };
+    }
+
+    // Find user in leaderboard
+    const userEntry = leaderboardResult.data.find(
+      (entry) => entry.username === user.name
+    );
+    if (!userEntry) {
+      // User not in leaderboard, means they have no progress
+      return {
+        success: true,
+        data: {
+          rank: leaderboardResult.data.length + 1,
+          consecutiveClues: 0,
+          totalClues: 0,
+          username: user.name,
+        },
+      };
+    }
+
+    return {
+      success: true,
+      data: {
+        rank: userEntry.rank,
+        consecutiveClues: userEntry.consecutiveClues,
+        totalClues: userEntry.totalClues,
+        username: user.name,
+      },
+    };
+  } catch (error) {
+    console.error("Error getting user rank:", error);
+    return { success: false, error: "Failed to get user rank" };
   }
 }
 
