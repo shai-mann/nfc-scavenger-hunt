@@ -21,131 +21,6 @@ export function withMethodRestriction(
   };
 }
 
-// Get the base URL from environment variables
-const getBaseUrl = () => {
-  // Use SERVERLESS_FUNCTIONS_URL from environment variables
-  return process.env.SERVERLESS_FUNCTIONS_URL || "http://localhost:3000";
-};
-
-const BASE_URL = getBaseUrl();
-
-class ApiClient {
-  private baseUrl: string;
-  private userId: string | null = null;
-
-  constructor(baseUrl: string) {
-    this.baseUrl = baseUrl;
-  }
-
-  setUserId(userId: string) {
-    this.userId = userId;
-  }
-
-  getUserId(): string | null {
-    return this.userId;
-  }
-
-  private async makeRequest<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<ApiResponse<T>> {
-    const url = `${this.baseUrl}/api${endpoint}`;
-
-    const headers = {
-      "Content-Type": "application/json",
-      ...(this.userId && { "x-user-id": this.userId }),
-      ...options.headers,
-    };
-
-    try {
-      const response = await fetch(url, {
-        ...options,
-        headers,
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        return {
-          success: false,
-          error: data.error || "An error occurred",
-        };
-      }
-
-      return data;
-    } catch (error) {
-      console.error("API request failed:", error);
-      return {
-        success: false,
-        error: "Network error occurred",
-      };
-    }
-  }
-
-  // User endpoints
-  async registerUser(userData: CreateUserRequest): Promise<ApiResponse<User>> {
-    const response = await this.makeRequest<User>("/users/register", {
-      method: "POST",
-      body: JSON.stringify(userData),
-    });
-
-    // If registration successful, store the user ID
-    if (response.success && response.data) {
-      this.setUserId(response.data.id);
-    }
-
-    return response;
-  }
-
-  async getUserProfile(): Promise<ApiResponse<User>> {
-    if (!this.userId) {
-      return {
-        success: false,
-        error: "No user ID available",
-      };
-    }
-
-    return this.makeRequest<User>("/users/profile");
-  }
-
-  // Clue endpoints
-  async getUserClues(): Promise<ApiResponse<Clue[]>> {
-    return this.makeRequest<Clue[]>("/clues");
-  }
-
-  async getClue(clueId: string): Promise<ApiResponse<Clue>> {
-    return this.makeRequest<Clue>(`/clues/${clueId}`);
-  }
-
-  async unlockClue(
-    clueId: string,
-    password: string
-  ): Promise<ApiResponse<any>> {
-    if (!this.userId) {
-      return {
-        success: false,
-        error: "No user ID available",
-      };
-    }
-
-    return this.makeRequest<any>(`/clues/${clueId}/unlock`, {
-      method: "POST",
-      body: JSON.stringify({
-        userId: this.userId,
-        password,
-      }),
-    });
-  }
-
-  // Health check
-  async healthCheck(): Promise<ApiResponse<any>> {
-    return this.makeRequest<any>("/health");
-  }
-}
-
-// Create and export a singleton instance
-export const apiClient = new ApiClient(BASE_URL);
-
 // Helper functions for API routes
 // Helper functions for validating request bodies in Vercel Functions
 export async function validateRequestBody<T>(
@@ -214,6 +89,8 @@ export async function findUserById(userId: string): Promise<User | null> {
     .eq("id", userId)
     .single();
 
+  console.log("findUserById", user, error);
+
   if (error || !user) {
     return null;
   }
@@ -254,6 +131,37 @@ export async function createUser(
     return { success: true, data: newUser };
   } catch {
     return { success: false, error: "Failed to create user" };
+  }
+}
+
+export async function updateUser(
+  userId: string,
+  userData: Partial<Omit<User, "id" | "created_at">>
+): Promise<ApiResponse<User>> {
+  try {
+    const user = await findUserById(userId);
+    if (!user) {
+      console.error("User not found");
+      return { success: false, error: "User not found" };
+    }
+
+    const { data: updatedUser, error } = await supabase
+      .from("users")
+      .update(userData)
+      .eq("id", userId)
+      .select()
+      .single();
+
+    console.log("updateUser", updatedUser, error);
+
+    if (error) {
+      console.error(error);
+      return { success: false, error: "Failed to update user" };
+    }
+
+    return { success: true, data: updatedUser };
+  } catch {
+    return { success: false, error: "Failed to update user" };
   }
 }
 

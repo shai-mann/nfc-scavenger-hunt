@@ -16,6 +16,8 @@ export const UserParamsSchema = z.object({
   id: z.string().uuid("Invalid user ID format"),
 });
 
+export const UpdateUserSchema = CreateUserSchema;
+
 // Clue schemas
 export const ClueParamsSchema = z.object({
   id: z.string().uuid("Invalid clue ID format"),
@@ -37,6 +39,7 @@ export const UserProgressParamsSchema = z.object({
 
 // Export types
 export type CreateUserRequest = z.infer<typeof CreateUserSchema>;
+export type UpdateUserRequest = z.infer<typeof UpdateUserSchema>;
 export type UserParams = z.infer<typeof UserParamsSchema>;
 export type ClueParams = z.infer<typeof ClueParamsSchema>;
 export type VerifyCluePasswordRequest = z.infer<
@@ -74,14 +77,14 @@ export interface UserProgress {
 }
 
 // API Response types
-export interface ApiResponse<T = any> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  message?: string;
+export type ApiResponse<T = any> = ApiSuccessResponse<T> | ApiErrorResponse;
+
+export interface ApiSuccessResponse<T = any> {
+  success: true;
+  data: T;
 }
 
-export interface ApiError {
+export interface ApiErrorResponse {
   success: false;
   error: string;
   statusCode?: number;

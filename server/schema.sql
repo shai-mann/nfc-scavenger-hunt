@@ -46,10 +46,12 @@ ALTER TABLE user_progress ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can read all users" ON users FOR SELECT USING (true);
 -- Users can insert their own record
 CREATE POLICY "Users can insert their own record" ON users FOR INSERT WITH CHECK (true);
+-- Users can update their own record
+CREATE POLICY "Users can update their own record" ON users FOR UPDATE WITH CHECK (true);
 
 -- Users can read all progress (needed for checking unlocks)
 CREATE POLICY "Users can read all progress" ON user_progress FOR SELECT USING (true);
 -- Users can insert their own progress
 CREATE POLICY "Users can insert progress" ON user_progress FOR INSERT WITH CHECK (true);
--- Users can read all clues
-CREATE POLICY "Users can read all clues" ON clues FOR SELECT USING (true);
+-- Users can read unlocked clues
+CREATE POLICY "Users can read unlocked clues" ON clues FOR SELECT USING 
