@@ -50,7 +50,7 @@ export const CluePath = () => {
     error,
     refetch,
   } = useQuery({
-    queryKey: ["home-page-user-clues"],
+    queryKey: ["home-page-user-clues", apiClient.getUserId()],
     queryFn: async (): Promise<ClueMetadata[]> => {
       const response = await apiClient.getUserClues();
 

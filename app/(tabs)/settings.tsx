@@ -5,6 +5,7 @@ import { Text } from "@/components/ui/text";
 import { apiClient } from "@/lib/api-client";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
+import { ExternalLink } from "lucide-react-native";
 import React, { useEffect, useLayoutEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -13,14 +14,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SettingsPage() {
-  const insets = useSafeAreaInsets();
-
   const [isEditingUsername, setIsEditingUsername] = useState(false);
   const [newUsername, setNewUsername] = useState("");
   const [currentUser, setCurrentUser] = useState<{ username: string } | null>(
@@ -41,7 +37,7 @@ export default function SettingsPage() {
     refetch: refetchProfile,
     isPending: isPendingProfile,
   } = useQuery({
-    queryKey: ["user-profile"],
+    queryKey: ["user-profile", apiClient.getUserId()],
     queryFn: async () => {
       const response = await apiClient.getUserProfile();
       if (response.success && response.data) {
@@ -149,7 +145,6 @@ export default function SettingsPage() {
                 Tap to upload a new photo
               </Text>
             </View>
-            <IconSymbol size={16} name="chevron.right" color="#999" />
           </TouchableOpacity>
 
           {/* Username */}
@@ -166,7 +161,7 @@ export default function SettingsPage() {
                   onPress={() => setIsEditingUsername(true)}
                   className="p-1"
                 >
-                  <IconSymbol size={16} name="pencil" color="#AD8AD1" />
+                  <IconSymbol size={16} name="pencil" color="#999" />
                 </TouchableOpacity>
               )}
             </View>
@@ -215,7 +210,7 @@ export default function SettingsPage() {
         </View>
 
         {/* Support Section */}
-        <View className="mb-8">
+        <View className="mb-6">
           <Text
             variant="h3"
             className="text-lg font-semibold mb-4 text-muted-foreground"
@@ -242,7 +237,7 @@ export default function SettingsPage() {
                 Help us improve the app
               </Text>
             </View>
-            <IconSymbol size={16} name="chevron.right" color="#999" />
+            <ExternalLink size={20} stroke="#999" />
           </TouchableOpacity>
         </View>
 
@@ -265,22 +260,23 @@ export default function SettingsPage() {
 
         {/* Debug Section (Development only) */}
         {__DEV__ && (
-          <View className="bg-muted/50 p-4 rounded-xl mt-8">
+          <View className="bg-muted/50 p-4 rounded-xl mt-6 gap-y-2">
             <Text variant="default" className="text-muted-foreground text-sm">
               Debug Section
             </Text>
             <Text variant="default" className="text-muted-foreground text-sm">
               User ID: {apiClient.getUserId()}
             </Text>
-            <TouchableOpacity
-              onPress={async () => {
-                await apiClient.clearUserId();
-                router.replace("/registration");
-              }}
-            >
-              <Text variant="default" className="text-muted-foreground text-sm">
-                Clear Async Storage
-              </Text>
+            <TouchableOpacity>
+              <Button
+                variant="default"
+                onPress={async () => {
+                  await apiClient.clearUserId();
+                  router.replace("/registration");
+                }}
+              >
+                <Text>Clear Async Storage</Text>
+              </Button>
             </TouchableOpacity>
           </View>
         )}
