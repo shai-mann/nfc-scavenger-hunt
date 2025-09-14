@@ -76,6 +76,14 @@ export interface UserProgress {
   unlocked_at: string;
 }
 
+// Leaderboard types
+export interface UserRank {
+  username: string;
+  consecutiveClues: number;
+  totalClues: number;
+  rank: number;
+}
+
 // API Response types
 export type ApiResponse<T = any> = ApiSuccessResponse<T> | ApiErrorResponse;
 
