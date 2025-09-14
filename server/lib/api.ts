@@ -89,8 +89,6 @@ export async function findUserById(userId: string): Promise<User | null> {
     .eq("id", userId)
     .single();
 
-  console.log("findUserById", user, error);
-
   if (error || !user) {
     return null;
   }
@@ -228,7 +226,7 @@ export async function getConsecutiveClues(userId: string): Promise<{
       `
       )
       .eq("user_id", userId)
-      .order("clues.order_index", { ascending: true });
+      .order("clues(order_index)", { ascending: true });
 
     if (error) {
       console.error("Error fetching user progress:", error);
