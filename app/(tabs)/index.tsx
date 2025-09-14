@@ -1,6 +1,8 @@
 import Logo from "@/assets/images/DDlogo.png";
 import { CluePath } from "@/components/CluePath";
 import { Text } from "@/components/ui/text";
+import { apiClient } from "@/lib/api-client";
+import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { BookOpen } from "lucide-react-native";
 import React from "react";
@@ -8,8 +10,13 @@ import { Image, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomePage() {
-  // TODO: fetch rank from api
-  const rank = 1;
+  const { data: rankData, isPending } = useQuery({
+    queryKey: ["rank", apiClient.getUserId()],
+    queryFn: async () => {
+      const response = await apiClient.getUserRank();
+      return response.data;
+    },
+  });
 
   return (
     <SafeAreaView className="flex-1 bg-white flex flex-col">
@@ -21,11 +28,12 @@ export default function HomePage() {
           Bits&apos; Hunt!
         </Text>
         <Text variant="default" className="text-gray-500 font-semibold">
-          Rank: {rank}
+          Rank:{" "}
+          {rankData?.rank ?? (isPending ? "Loading..." : "Failed to load rank")}
         </Text>
 
         {/* Rules button, floating right */}
-        <TouchableOpacity 
+        <TouchableOpacity
           className="absolute right-5 top-2 p-2"
           onPress={() => router.push("/(modals)/rules")}
         >

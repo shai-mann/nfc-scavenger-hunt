@@ -6,6 +6,7 @@ import {
   CreateUserRequest,
   HealthCheckResponse,
   User,
+  UserRank,
 } from "@/types/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -189,6 +190,18 @@ class ApiClient {
       status: response.status,
       data: response.data,
     };
+  }
+
+  // Leaderboard endpoints
+  async getUserRank(): Promise<ApiResponse<UserRank>> {
+    if (!this.userId) {
+      return {
+        success: false,
+        error: "No user ID available",
+        status: 401,
+      };
+    }
+    return this.makeRequest<UserRank>("/leaderboard/rank");
   }
 
   // Health check
