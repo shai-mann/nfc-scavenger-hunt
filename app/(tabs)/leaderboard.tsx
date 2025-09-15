@@ -8,9 +8,13 @@ import { useQuery } from "@tanstack/react-query";
 import { Crown, Medal, Trophy, User } from "lucide-react-native";
 import React, { useCallback, useState } from "react";
 import { FlatList, RefreshControl, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 export default function LeaderboardPage() {
+  const insets = useSafeAreaInsets();
   const [isManualRefreshing, setIsManualRefreshing] = useState(false);
 
   const {
@@ -85,7 +89,10 @@ export default function LeaderboardPage() {
           data={leaderboardData}
           keyExtractor={(item) => `${item.username}-${item.rank}`}
           renderItem={({ item }) => <LeaderboardItem item={item} />}
-          contentContainerStyle={{ paddingVertical: 16 }}
+          contentContainerStyle={{
+            paddingTop: 16,
+            paddingBottom: insets.bottom + 25,
+          }}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl
