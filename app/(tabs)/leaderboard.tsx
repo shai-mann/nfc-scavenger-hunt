@@ -1,174 +1,241 @@
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
-import React from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
-
-// Sample leaderboard data
-const sampleLeaderboard = [
-  { rank: 1, username: "ScavengerKing", score: 1250, clues: 8 },
-  { rank: 2, username: "HuntMaster", score: 1100, clues: 7 },
-  { rank: 3, username: "ClueFinder", score: 950, clues: 6 },
-  { rank: 4, username: "AdventureSeeker", score: 800, clues: 5 },
-  { rank: 5, username: "PuzzleSolver", score: 650, clues: 4 },
-  { rank: 6, username: "TagHunter", score: 500, clues: 3 },
-  { rank: 7, username: "MysteryLover", score: 350, clues: 2 },
-  { rank: 8, username: "NewExplorer", score: 200, clues: 1 },
-];
+import { ErrorState } from "@/components/ErrorState";
+import { LoadingState } from "@/components/LoadingState";
+import { Text } from "@/components/ui/text";
+import { apiClient } from "@/lib/api-client";
+import { cn } from "@/lib/utils";
+import { useFocusEffect } from "@react-navigation/native";
+import { useQuery } from "@tanstack/react-query";
+import { Crown, Medal, Trophy, User } from "lucide-react-native";
+import React, { useCallback, useState } from "react";
+import { FlatList, RefreshControl, View } from "react-native";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 export default function LeaderboardPage() {
-  const getRankIcon = (rank: number) => {
-    switch (rank) {
-      case 1:
-        return "🥇";
-      case 2:
-        return "🥈";
-      case 3:
-        return "🥉";
-      default:
-        return `#${rank}`;
-    }
-  };
+  const insets = useSafeAreaInsets();
+  const [isManualRefreshing, setIsManualRefreshing] = useState(false);
 
-  const getRankColor = (rank: number) => {
-    switch (rank) {
-      case 1:
-        return "#FFD700"; // Gold
-      case 2:
-        return "#C0C0C0"; // Silver
-      case 3:
-        return "#CD7F32"; // Bronze
-      default:
-        return "#666";
+  const {
+    data: leaderboardData,
+    isPending,
+    error,
+    refetch,
+    isRefetching,
+  } = useQuery({
+    queryKey: ["leaderboard"],
+    queryFn: async () => {
+      const response = await apiClient.getLeaderboard();
+      if (!response.success) {
+        throw new Error(response.error);
+      }
+      return response.data;
+    },
+  });
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
+
+  // Separate handler for manual pull-to-refresh
+  const handleManualRefresh = useCallback(async () => {
+    setIsManualRefreshing(true);
+    try {
+      await refetch();
+    } finally {
+      setIsManualRefreshing(false);
     }
-  };
+  }, [refetch]);
+
+  if (isPending) {
+    return (
+      <SafeAreaView className="flex-1 bg-white">
+        <LoadingState message="Loading leaderboard..." />
+      </SafeAreaView>
+    );
+  }
+
+  if (error || !leaderboardData) {
+    return (
+      <SafeAreaView className="flex-1 bg-white">
+        <ErrorState
+          error={{
+            message: "We couldn't load the leaderboard data. Please try again.",
+          }}
+          refetch={refetch}
+        />
+      </SafeAreaView>
+    );
+  }
 
   return (
-    <ThemedView style={styles.container}>
-      <View style={styles.header}>
-        <ThemedText type="defaultSemiBold" style={styles.title}>
-          Leaderboard
-        </ThemedText>
-        <ThemedText type="default" style={styles.subtitle}>
-          Top Scavenger Hunt Players
-        </ThemedText>
+    <SafeAreaView className="flex-1 bg-gray-50">
+      {/* Header */}
+      <View className="px-5 py-2 flex flex-col items-center justify-center border-secondary border-b">
+        <Text variant="h1" className="text-gray-800 font-semibold">
+          Bits&apos; Leaderboard
+        </Text>
+        <Text variant="default" className="text-gray-500 font-semibold">
+          Top hunters in the scavenger hunt
+        </Text>
       </View>
 
-      <ScrollView
-        style={styles.leaderboardContainer}
-        showsVerticalScrollIndicator={false}
-      >
-        {sampleLeaderboard.map((player) => (
-          <View key={player.rank} style={styles.playerRow}>
-            <View style={styles.rankContainer}>
-              <ThemedText
-                type="defaultSemiBold"
-                style={[styles.rank, { color: getRankColor(player.rank) }]}
-              >
-                {getRankIcon(player.rank)}
-              </ThemedText>
+      {/* Leaderboard List */}
+      {leaderboardData.length > 0 ? (
+        <FlatList
+          data={leaderboardData}
+          keyExtractor={(item) => `${item.username}-${item.rank}`}
+          renderItem={({ item }) => <LeaderboardItem item={item} />}
+          contentContainerStyle={{
+            paddingTop: 16,
+            paddingBottom: insets.bottom + 25,
+          }}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={isManualRefreshing}
+              onRefresh={handleManualRefresh}
+              colors={["#AD8AD1"]}
+              tintColor="#AD8AD1"
+            />
+          }
+        />
+      ) : (
+        <FlatList
+          data={[]}
+          renderItem={() => null}
+          contentContainerStyle={{ flex: 1 }}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefetching}
+              onRefresh={refetch}
+              colors={["#AD8AD1"]}
+              tintColor="#AD8AD1"
+            />
+          }
+          ListEmptyComponent={
+            <View className="flex-1 items-center justify-center p-8">
+              <User size={48} color="#9ca3af" />
+              <Text variant="large" className="mt-4 text-center text-gray-600">
+                No players yet
+              </Text>
+              <Text variant="muted" className="mt-2 text-center">
+                Be the first to solve some clues and make it to the leaderboard!
+              </Text>
             </View>
-
-            <View style={styles.playerInfo}>
-              <ThemedText type="defaultSemiBold" style={styles.username}>
-                {player.username}
-              </ThemedText>
-              <ThemedText type="default" style={styles.stats}>
-                {player.clues} clues found
-              </ThemedText>
-            </View>
-
-            <View style={styles.scoreContainer}>
-              <ThemedText type="defaultSemiBold" style={styles.score}>
-                {player.score}
-              </ThemedText>
-              <ThemedText type="default" style={styles.scoreLabel}>
-                pts
-              </ThemedText>
-            </View>
-          </View>
-        ))}
-      </ScrollView>
-
-      <View style={styles.footer}>
-        <ThemedText type="default" style={styles.footerText}>
-          Keep exploring to climb the ranks!
-        </ThemedText>
-      </View>
-    </ThemedView>
+          }
+        />
+      )}
+    </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    paddingTop: 60,
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-    alignItems: "center",
-  },
-  title: {
-    fontSize: 32,
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    opacity: 0.7,
-  },
-  leaderboardContainer: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-  playerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    backgroundColor: "#f8f8f8",
-    borderRadius: 12,
-    marginBottom: 12,
-  },
-  rankContainer: {
-    width: 50,
-    alignItems: "center",
-  },
-  rank: {
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  playerInfo: {
-    flex: 1,
-    marginLeft: 16,
-  },
-  username: {
-    fontSize: 18,
-    marginBottom: 4,
-  },
-  stats: {
-    fontSize: 14,
-    opacity: 0.7,
-  },
-  scoreContainer: {
-    alignItems: "center",
-  },
-  score: {
-    fontSize: 20,
-    color: "#007AFF",
-    fontWeight: "bold",
-  },
-  scoreLabel: {
-    fontSize: 12,
-    opacity: 0.6,
-    textTransform: "uppercase",
-  },
-  footer: {
-    padding: 20,
-    alignItems: "center",
-  },
-  footerText: {
-    fontSize: 14,
-    opacity: 0.6,
-    textAlign: "center",
-  },
-});
+const LeaderboardItem = ({
+  item,
+}: {
+  item: {
+    username: string;
+    consecutiveClues: number;
+    totalClues: number;
+    rank: number;
+  };
+}) => {
+  const colors = getRankColors(item.rank);
+  const isTopThree = item.rank <= 3;
+
+  return (
+    <View
+      className={`mx-4 mb-3 rounded-2xl border p-4 shadow-sm ${colors.bg} ${
+        isTopThree ? "shadow-md" : ""
+      }`}
+    >
+      <View className="flex-row items-center">
+        {/* Rank Icon */}
+        <View className="mr-4 items-center justify-center">
+          {getRankIcon(item.rank)}
+          {item.rank > 3 && (
+            <Text variant="small" className={`mt-1 font-bold ${colors.accent}`}>
+              #{item.rank}
+            </Text>
+          )}
+        </View>
+
+        {/* User Info */}
+        <View className="flex-1 gap-y-1">
+          <Text variant="large" className={`font-semibold ${colors.text}`}>
+            {item.username}
+          </Text>
+          <Text variant="small" className={colors.accent}>
+            {item.totalClues} total clue{item.totalClues !== 1 ? "s" : ""}
+          </Text>
+        </View>
+
+        {/* Score Badge */}
+        <View
+          className={cn(
+            "rounded-xl px-3 py-2 border border-secondary",
+            isTopThree ? "bg-white/70" : "bg-gray-50"
+          )}
+        >
+          <Text
+            variant="large"
+            className={`text-center font-bold ${colors.text}`}
+          >
+            {item.consecutiveClues}
+          </Text>
+          <Text
+            variant="small"
+            className={`text-center uppercase ${colors.accent}`}
+          >
+            streak
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
+};
+
+const getRankIcon = (rank: number) => {
+  switch (rank) {
+    case 1:
+      return <Crown size={24} color="#FFD700" />;
+    case 2:
+      return <Trophy size={24} color="#C0C0C0" />;
+    case 3:
+      return <Medal size={24} color="#CD7F32" />;
+    default:
+      return <User size={20} color="#64748b" />;
+  }
+};
+
+const getRankColors = (rank: number) => {
+  switch (rank) {
+    case 1:
+      return {
+        bg: "bg-yellow-50 border-yellow-200",
+        text: "text-yellow-800",
+        accent: "text-yellow-600",
+      };
+    case 2:
+      return {
+        bg: "bg-gray-50 border-gray-200",
+        text: "text-gray-800",
+        accent: "text-gray-600",
+      };
+    case 3:
+      return {
+        bg: "bg-orange-50 border-orange-200",
+        text: "text-orange-800",
+        accent: "text-orange-600",
+      };
+    default:
+      return {
+        bg: "bg-white border-gray-100",
+        text: "text-gray-900",
+        accent: "text-gray-600",
+      };
+  }
+};

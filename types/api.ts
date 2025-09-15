@@ -11,6 +11,13 @@ export interface User {
   created_at: string;
 }
 
+export interface UserRank {
+  rank: number;
+  consecutiveClues: number;
+  totalClues: number;
+  username: string;
+}
+
 export interface Clue {
   id: string;
   title: string;
