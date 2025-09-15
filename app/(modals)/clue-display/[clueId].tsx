@@ -157,8 +157,7 @@ export default function ClueDisplayModal() {
         {/* Clue ID Display */}
         <View className="bg-muted p-3 rounded-lg mb-6">
           <Text variant="default" className="text-sm opacity-70 text-center">
-            {/* TODO: make this the Name of the Bits that was found! */}
-            You found {clue.title}!
+            You found {clue.bits_name}!
           </Text>
         </View>
 

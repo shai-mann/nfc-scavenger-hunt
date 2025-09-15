@@ -4,19 +4,19 @@
 -- Create users table
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name VARCHAR(50) NOT NULL,
+    name text NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Create clues table
 CREATE TABLE IF NOT EXISTS clues (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    title VARCHAR(255) NOT NULL,
-    bits_name VARCHAR(255) NOT NULL,
+    title text NOT NULL,
+    bits_name text NOT NULL,
     data JSONB, -- Clue data is stored as raw JSON, to avoid restricting the data structure
-    nfc_tag_id VARCHAR(255) NOT NULL, -- This serves as the password for unlocking
+    nfc_tag_id text NOT NULL, -- This serves as the password for unlocking
     order_index INTEGER DEFAULT 0,
-    lock_state VARCHAR(255) DEFAULT 'none'
+    lock_state text DEFAULT 'none'
 );
 
 -- Create user_progress table to track which clues users have unlocked
