@@ -193,6 +193,10 @@ class ApiClient {
   }
 
   // Leaderboard endpoints
+  async getLeaderboard(): Promise<ApiResponse<UserRank[]>> {
+    return this.makeRequest<UserRank[]>("/leaderboard");
+  }
+
   async getUserRank(): Promise<ApiResponse<UserRank>> {
     if (!this.userId) {
       return {
