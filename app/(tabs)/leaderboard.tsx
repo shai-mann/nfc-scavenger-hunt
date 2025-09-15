@@ -6,11 +6,13 @@ import { cn } from "@/lib/utils";
 import { useFocusEffect } from "@react-navigation/native";
 import { useQuery } from "@tanstack/react-query";
 import { Crown, Medal, Trophy, User } from "lucide-react-native";
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import { FlatList, RefreshControl, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function LeaderboardPage() {
+  const [isManualRefreshing, setIsManualRefreshing] = useState(false);
+
   const {
     data: leaderboardData,
     isPending,
@@ -33,6 +35,16 @@ export default function LeaderboardPage() {
       refetch();
     }, [refetch])
   );
+
+  // Separate handler for manual pull-to-refresh
+  const handleManualRefresh = useCallback(async () => {
+    setIsManualRefreshing(true);
+    try {
+      await refetch();
+    } finally {
+      setIsManualRefreshing(false);
+    }
+  }, [refetch]);
 
   if (isPending) {
     return (
@@ -77,8 +89,8 @@ export default function LeaderboardPage() {
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl
-              refreshing={isRefetching}
-              onRefresh={refetch}
+              refreshing={isManualRefreshing}
+              onRefresh={handleManualRefresh}
               colors={["#AD8AD1"]}
               tintColor="#AD8AD1"
             />
@@ -110,13 +122,6 @@ export default function LeaderboardPage() {
           }
         />
       )}
-
-      {/* Footer */}
-      <View className="bg-white px-5 py-4 border-t border-gray-100">
-        <Text variant="small" className="text-center text-gray-500">
-          Keep exploring to climb the ranks! 🚀
-        </Text>
-      </View>
     </SafeAreaView>
   );
 }
