@@ -3,9 +3,10 @@ import { LoadingState } from "@/components/LoadingState";
 import { Text } from "@/components/ui/text";
 import { apiClient } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
+import { useFocusEffect } from "@react-navigation/native";
 import { useQuery } from "@tanstack/react-query";
 import { Crown, Medal, Trophy, User } from "lucide-react-native";
-import React from "react";
+import React, { useCallback } from "react";
 import { FlatList, RefreshControl, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -27,117 +28,11 @@ export default function LeaderboardPage() {
     },
   });
 
-  const getRankIcon = (rank: number) => {
-    switch (rank) {
-      case 1:
-        return <Crown size={24} color="#FFD700" />;
-      case 2:
-        return <Trophy size={24} color="#C0C0C0" />;
-      case 3:
-        return <Medal size={24} color="#CD7F32" />;
-      default:
-        return <User size={20} color="#64748b" />;
-    }
-  };
-
-  const getRankColors = (rank: number) => {
-    switch (rank) {
-      case 1:
-        return {
-          bg: "bg-yellow-50 border-yellow-200",
-          text: "text-yellow-800",
-          accent: "text-yellow-600",
-        };
-      case 2:
-        return {
-          bg: "bg-gray-50 border-gray-200",
-          text: "text-gray-800",
-          accent: "text-gray-600",
-        };
-      case 3:
-        return {
-          bg: "bg-orange-50 border-orange-200",
-          text: "text-orange-800",
-          accent: "text-orange-600",
-        };
-      default:
-        return {
-          bg: "bg-white border-gray-100",
-          text: "text-gray-900",
-          accent: "text-gray-600",
-        };
-    }
-  };
-
-  const renderLeaderboardItem = ({
-    item,
-    index,
-  }: {
-    item: {
-      username: string;
-      consecutiveClues: number;
-      totalClues: number;
-      rank: number;
-    };
-    index: number;
-  }) => {
-    const colors = getRankColors(item.rank);
-    const isTopThree = item.rank <= 3;
-
-    return (
-      <View
-        className={`mx-4 mb-3 rounded-2xl border p-4 shadow-sm ${colors.bg} ${
-          isTopThree ? "shadow-md" : ""
-        }`}
-      >
-        <View className="flex-row items-center">
-          {/* Rank Icon */}
-          <View className="mr-4 items-center justify-center">
-            {getRankIcon(item.rank)}
-            {item.rank > 3 && (
-              <Text
-                variant="small"
-                className={`mt-1 font-bold ${colors.accent}`}
-              >
-                #{item.rank}
-              </Text>
-            )}
-          </View>
-
-          {/* User Info */}
-          <View className="flex-1 gap-y-1">
-            <Text variant="large" className={`font-semibold ${colors.text}`}>
-              {item.username}
-            </Text>
-            <Text variant="small" className={colors.accent}>
-              {item.totalClues} total clue{item.totalClues !== 1 ? "s" : ""}
-            </Text>
-          </View>
-
-          {/* Score Badge */}
-          <View
-            className={cn(
-              "rounded-xl px-3 py-2 border border-secondary",
-              isTopThree ? "bg-white/70" : "bg-gray-50"
-            )}
-          >
-            <Text
-              variant="large"
-              className={`text-center font-bold ${colors.text}`}
-            >
-              {item.consecutiveClues}
-            </Text>
-            <Text
-              variant="small"
-              className={`text-center uppercase ${colors.accent}`}
-            >
-              streak
-            </Text>
-          </View>
-        </View>
-      </View>
-    );
-  };
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
 
   if (isPending) {
     return (
@@ -177,7 +72,7 @@ export default function LeaderboardPage() {
         <FlatList
           data={leaderboardData}
           keyExtractor={(item) => `${item.username}-${item.rank}`}
-          renderItem={renderLeaderboardItem}
+          renderItem={({ item }) => <LeaderboardItem item={item} />}
           contentContainerStyle={{ paddingVertical: 16 }}
           showsVerticalScrollIndicator={false}
           refreshControl={
@@ -225,3 +120,110 @@ export default function LeaderboardPage() {
     </SafeAreaView>
   );
 }
+
+const LeaderboardItem = ({
+  item,
+}: {
+  item: {
+    username: string;
+    consecutiveClues: number;
+    totalClues: number;
+    rank: number;
+  };
+}) => {
+  const colors = getRankColors(item.rank);
+  const isTopThree = item.rank <= 3;
+
+  return (
+    <View
+      className={`mx-4 mb-3 rounded-2xl border p-4 shadow-sm ${colors.bg} ${
+        isTopThree ? "shadow-md" : ""
+      }`}
+    >
+      <View className="flex-row items-center">
+        {/* Rank Icon */}
+        <View className="mr-4 items-center justify-center">
+          {getRankIcon(item.rank)}
+          {item.rank > 3 && (
+            <Text variant="small" className={`mt-1 font-bold ${colors.accent}`}>
+              #{item.rank}
+            </Text>
+          )}
+        </View>
+
+        {/* User Info */}
+        <View className="flex-1 gap-y-1">
+          <Text variant="large" className={`font-semibold ${colors.text}`}>
+            {item.username}
+          </Text>
+          <Text variant="small" className={colors.accent}>
+            {item.totalClues} total clue{item.totalClues !== 1 ? "s" : ""}
+          </Text>
+        </View>
+
+        {/* Score Badge */}
+        <View
+          className={cn(
+            "rounded-xl px-3 py-2 border border-secondary",
+            isTopThree ? "bg-white/70" : "bg-gray-50"
+          )}
+        >
+          <Text
+            variant="large"
+            className={`text-center font-bold ${colors.text}`}
+          >
+            {item.consecutiveClues}
+          </Text>
+          <Text
+            variant="small"
+            className={`text-center uppercase ${colors.accent}`}
+          >
+            streak
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
+};
+
+const getRankIcon = (rank: number) => {
+  switch (rank) {
+    case 1:
+      return <Crown size={24} color="#FFD700" />;
+    case 2:
+      return <Trophy size={24} color="#C0C0C0" />;
+    case 3:
+      return <Medal size={24} color="#CD7F32" />;
+    default:
+      return <User size={20} color="#64748b" />;
+  }
+};
+
+const getRankColors = (rank: number) => {
+  switch (rank) {
+    case 1:
+      return {
+        bg: "bg-yellow-50 border-yellow-200",
+        text: "text-yellow-800",
+        accent: "text-yellow-600",
+      };
+    case 2:
+      return {
+        bg: "bg-gray-50 border-gray-200",
+        text: "text-gray-800",
+        accent: "text-gray-600",
+      };
+    case 3:
+      return {
+        bg: "bg-orange-50 border-orange-200",
+        text: "text-orange-800",
+        accent: "text-orange-600",
+      };
+    default:
+      return {
+        bg: "bg-white border-gray-100",
+        text: "text-gray-900",
+        accent: "text-gray-600",
+      };
+  }
+};

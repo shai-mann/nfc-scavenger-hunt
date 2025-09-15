@@ -2,21 +2,32 @@ import Logo from "@/assets/images/DDlogo.png";
 import { CluePath } from "@/components/CluePath";
 import { Text } from "@/components/ui/text";
 import { apiClient } from "@/lib/api-client";
+import { useFocusEffect } from "@react-navigation/native";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { BookOpen } from "lucide-react-native";
-import React from "react";
+import React, { useCallback } from "react";
 import { Image, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomePage() {
-  const { data: rankData, isPending } = useQuery({
+  const {
+    data: rankData,
+    isPending,
+    refetch,
+  } = useQuery({
     queryKey: ["rank", apiClient.getUserId()],
     queryFn: async () => {
       const response = await apiClient.getUserRank();
       return response.data;
     },
   });
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
 
   return (
     <SafeAreaView className="flex-1 bg-white flex flex-col">
