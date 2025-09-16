@@ -9,6 +9,7 @@ import Clipboard from "@react-native-clipboard/clipboard";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useLayoutEffect, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Image,
   Pressable,
@@ -34,6 +35,8 @@ export default function ClueDisplayModal() {
   const [loadingMessage, setLoadingMessage] =
     useState<string>("Loading clue...");
   const [error, setError] = useState<string>("");
+  const [imageLoading, setImageLoading] = useState(false);
+  const [imageError, setImageError] = useState<string>("");
 
   const handleUnlockClue = useCallback(async () => {
     setLoading(true);
@@ -195,11 +198,29 @@ export default function ClueDisplayModal() {
             </Pressable>
           )}
           {clue.data.image && (
-            <Image
-              source={{ uri: clue.data.image }}
-              className="w-full h-full"
-              resizeMode="contain"
-            />
+            <View className="relative justify-center items-center">
+              <Image
+                source={{ uri: clue.data.image }}
+                className="w-full h-full p-8 border border-muted rounded-lg"
+                resizeMode="contain"
+                onLoadStart={() => setImageLoading(true)}
+                onLoad={() => setImageLoading(false)}
+                onError={() => {
+                  setImageLoading(false);
+                  setImageError("Image failed to load");
+                }}
+              />
+              {imageLoading && (
+                <ActivityIndicator
+                  className="absolute"
+                  size="large"
+                  color="#AD8AD1"
+                />
+              )}
+              {imageError && (
+                <Text className="text-destructive">{imageError}</Text>
+              )}
+            </View>
           )}
         </View>
       </ScrollView>
