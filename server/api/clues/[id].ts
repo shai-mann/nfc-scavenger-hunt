@@ -50,6 +50,23 @@ async function clueHandler(req: VercelRequest, res: VercelResponse) {
       return;
     }
 
+    // If there is an image in the clue's data, fetch that image
+    const imageUrl = clue.data.image;
+
+    if (imageUrl) {
+      // create a public URL for the image from the correct bucket in Supabase
+      const { data: imageURL, error: imageError } = await supabase.storage
+        .from("clue-assets")
+        .createSignedUrl(imageUrl, 60);
+      // replace the image data with the signed URL, so the original isn't exposed.
+      clue.data.image = imageURL?.signedUrl || "";
+      if (imageError || !imageURL?.signedUrl) {
+        createErrorResponse(res, "Failed to get image URL", 500);
+        console.error("Failed to get image URL:", imageError);
+        return;
+      }
+    }
+
     createSuccessResponse(res, clue);
   } catch (error) {
     if (error instanceof ZodError) {

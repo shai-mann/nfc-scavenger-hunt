@@ -62,11 +62,10 @@ export interface Clue {
   id: string;
   title: string;
   bits_name: string;
-  description: string;
+  data: Record<string, string>;
   nfc_tag_id: string;
   order_index: number;
   lock_state: LockState;
-  created_at: string;
 }
 
 export interface UserProgress {

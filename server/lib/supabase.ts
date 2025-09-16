@@ -36,31 +36,28 @@ export type Database = {
           id: string;
           title: string;
           bits_name: string;
-          description: string;
+          data: Record<string, string>;
           nfc_tag_id: string;
           order_index: number;
           lock_state: LockState;
-          created_at: string;
         };
         Insert: {
           id?: string;
           title: string;
           bits_name?: string;
-          description?: string;
+          data?: Record<string, string>;
           nfc_tag_id: string;
           order_index?: number;
           lock_state?: LockState;
-          created_at?: string;
         };
         Update: {
           id?: string;
           title?: string;
           bits_name?: string;
-          description?: string;
+          data?: Record<string, string>;
           nfc_tag_id?: string;
           order_index?: number;
           lock_state?: LockState;
-          created_at?: string;
         };
         Relationships: [];
       };
