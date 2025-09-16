@@ -1,4 +1,4 @@
-import Logo from "@/assets/images/DDlogo.png";
+import Logo from "@/assets/images/NFChunt-logo.png";
 import { CluePath } from "@/components/CluePath";
 import { Text } from "@/components/ui/text";
 import { apiClient } from "@/lib/api-client";
