@@ -3,12 +3,23 @@ import { LockState } from "./types";
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+const supabaseAdminKey = process.env.SUPABASE_ADMIN_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
+if (!supabaseUrl || !supabaseAnonKey || !supabaseAdminKey) {
   throw new Error("Missing Supabase environment variables");
 }
 
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
+export const supabaseAdmin = createClient<Database>(
+  supabaseUrl,
+  supabaseAdminKey,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  }
+);
 
 export type Database = {
   public: {

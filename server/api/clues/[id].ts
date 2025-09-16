@@ -6,7 +6,7 @@ import {
   getUserIdFromRequest,
   withMethodRestriction,
 } from "../../lib/api";
-import { supabase } from "../../lib/supabase";
+import { supabase, supabaseAdmin } from "../../lib/supabase";
 import { ClueParamsSchema } from "../../lib/types";
 
 async function clueHandler(req: VercelRequest, res: VercelResponse) {
@@ -53,9 +53,11 @@ async function clueHandler(req: VercelRequest, res: VercelResponse) {
     // If there is an image in the clue's data, fetch that image
     const imageUrl = clue.data.image;
 
+    await listBucketContents();
+
     if (imageUrl) {
       // create a public URL for the image from the correct bucket in Supabase
-      const { data: imageURL, error: imageError } = await supabase.storage
+      const { data: imageURL, error: imageError } = await supabaseAdmin.storage
         .from("clue-assets")
         .createSignedUrl(imageUrl, 60);
       // replace the image data with the signed URL, so the original isn't exposed.
@@ -76,6 +78,29 @@ async function clueHandler(req: VercelRequest, res: VercelResponse) {
 
     console.error("Get clue error:", error);
     createErrorResponse(res, "Internal server error", 500);
+  }
+}
+
+// TEMP TODO: remove
+async function listBucketContents() {
+  try {
+    console.log("fetching assets from clue-assets bucket");
+    const { data, error } = await supabaseAdmin.storage
+      .from("clue-assets")
+      .list("", {
+        limit: 100,
+        offset: 0,
+      });
+
+    if (error) {
+      console.error("Error listing files:", error);
+      return;
+    }
+
+    console.log("Files in bucket:", data);
+    // Look for clue-5.png in this list
+  } catch (error) {
+    console.error("Error:", error);
   }
 }
 
