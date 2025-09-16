@@ -15,12 +15,12 @@ function escapeSQL(value) {
 }
 
 // Build SQL statements
-const sqlStatements = clues.map((clue) => {
+const sqlStatements = clues.map((clue, idx) => {
   const id = clue.id;
   const title = escapeSQL(clue.title);
   const dataJson = escapeSQL(JSON.stringify(clue.data || {}));
   const nfc_tag_id = escapeSQL(clue.password);
-  const order_index = clue.order_index ?? 0;
+  const order_index = idx;
   const lock_state = escapeSQL(clue.lock_state ?? "none");
   const bits_name = escapeSQL(clue.bits_name ?? "");
 
