@@ -10,6 +10,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useLayoutEffect, useState } from "react";
 import {
   Alert,
+  Image,
   Pressable,
   ScrollView,
   TouchableOpacity,
@@ -192,6 +193,13 @@ export default function ClueDisplayModal() {
                 </Text>
               </View>
             </Pressable>
+          )}
+          {clue.data.image && (
+            <Image
+              source={{ uri: clue.data.image }}
+              className="w-full h-full"
+              resizeMode="contain"
+            />
           )}
         </View>
       </ScrollView>
