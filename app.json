@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "nfc-scavenger-hunt",
+    "name": "Go Find Me",
     "slug": "nfc-scavenger-hunt",
-    "version": "1.0.0",
+    "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "nfchunt",
@@ -10,19 +10,19 @@
     "newArchEnabled": true,
     "deepLinks": true,
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.shaimr.nfcscavengerhunt",
+      "supportsTablet": false,
+      "bundleIdentifier": "com.ghostsoftware.nfcscavengerhunt",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/NFChunt-logo.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.shaimr.nfcscavengerhunt"
+      "package": "com.ghostsoftware.nfcscavengerhunt"
     },
     "web": {
       "bundler": "metro",
