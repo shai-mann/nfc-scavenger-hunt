@@ -11,7 +11,7 @@
     "deepLinks": true,
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.ghostsoftware.nfcscavengerhunt",
+      "bundleIdentifier": "co.ghostsoftware.nfcscavengerhunt",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -22,7 +22,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.ghostsoftware.nfcscavengerhunt"
+      "package": "co.ghostsoftware.nfcscavengerhunt"
     },
     "web": {
       "bundler": "metro",
