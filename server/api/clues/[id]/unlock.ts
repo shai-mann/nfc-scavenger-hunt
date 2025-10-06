@@ -107,9 +107,11 @@ async function unlockHandler(req: VercelRequest, res: VercelResponse) {
     createSuccessResponse(
       res,
       {
+        id: clue.id,
         title: clue.title,
         data: clue.data,
         order_index: clue.order_index,
+        unlocked_at: new Date().toISOString(),
       },
       201
     );
