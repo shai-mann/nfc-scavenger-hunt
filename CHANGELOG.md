@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed a bug allowing users to change their names to be another user's taken username
 - Fixed a bug where the status bar does not change theme with the app
 - Fixed a bug where registration submit button was covered by the bottom bar in android
+- Fixed a bug where unlocking clues temporarily showed a retry option
 
 ### Security
 
