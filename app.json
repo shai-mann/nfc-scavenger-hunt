@@ -4,7 +4,7 @@
     "slug": "nfc-scavenger-hunt",
     "version": "0.1.0",
     "orientation": "portrait",
-    "icon": "./assets/images/NFChunt-logo.png",
+    "icon": "./assets/images/NFChunt-logo-padded.png",
     "scheme": "nfchunt",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -18,7 +18,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/NFChunt-logo.png",
+        "foregroundImage": "./assets/images/NFChunt-logo-padded.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
