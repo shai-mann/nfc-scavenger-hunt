@@ -166,7 +166,7 @@ export default function SettingsPage() {
                 <Input
                   value={newUsername}
                   onChangeText={setNewUsername}
-                  className="bg-background border border-border rounded-md p-3"
+                  className="bg-background border border-border rounded-md p-3 h-12"
                   placeholder="Enter new username"
                   autoFocus={true}
                 />
