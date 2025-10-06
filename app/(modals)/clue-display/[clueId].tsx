@@ -131,8 +131,6 @@ export default function ClueDisplayModal() {
     );
   }
 
-  //
-
   // Show error state
   if (error || !clue) {
     return (

@@ -110,6 +110,7 @@ async function unlockHandler(req: VercelRequest, res: VercelResponse) {
         id: clue.id,
         title: clue.title,
         data: clue.data,
+        bits_name: clue.bits_name,
         order_index: clue.order_index,
         unlocked_at: new Date().toISOString(),
       },

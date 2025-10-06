@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Allowed users to use spaces, !, ?, and - symbols in usernames
+- Added padding to app icon, improving look and feel of the app
 
 ### Fixed
 
