@@ -3,6 +3,7 @@ import {
   createErrorResponse,
   createSuccessResponse,
   findUserById,
+  findUserByUsername,
   getUserIdFromRequest,
   updateUser,
   validateRequestBody,
@@ -50,6 +51,13 @@ async function updateProfileHandler(req: VercelRequest, res: VercelResponse) {
     return; // Response already sent by validateRequestBody
   }
   const { username } = validatedData;
+
+  // Check if username already exists
+  const existingUser = await findUserByUsername(username);
+  if (existingUser) {
+    createErrorResponse(res, "This username is already registered", 409);
+    return;
+  }
 
   const response = await updateUser(userId, { name: username });
   if (!response.success) {

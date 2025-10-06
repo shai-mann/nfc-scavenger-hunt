@@ -18,6 +18,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fixed a bug where unlocking a clue failed to send the Bits information being unlocked
+- Fixed a bug allowing users to change their names to be another user's taken username
+
+### Security
+
+- Fixed a bug with disallowed method types causing serverless functions to crash.
 
 ## [0.1.0] - YYYY-MM-DD
 

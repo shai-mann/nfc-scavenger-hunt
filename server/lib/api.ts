@@ -10,11 +10,11 @@ export function withMethodRestriction(
 ) {
   return async (req: VercelRequest, res: VercelResponse): Promise<void> => {
     if (!allowedMethods.includes(req.method || "")) {
+      res.setHeader("Allow", allowedMethods.join(", "));
       res.status(405).json({
         success: false,
         error: `Method ${req.method} not allowed`,
       });
-      res.setHeader("Allow", allowedMethods.join(", "));
       return;
     }
     return handler(req, res);
