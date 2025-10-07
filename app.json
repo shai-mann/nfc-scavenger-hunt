@@ -2,7 +2,7 @@
   "expo": {
     "name": "Go Find Me",
     "slug": "nfc-scavenger-hunt",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "orientation": "portrait",
     "icon": "./assets/images/NFChunt-logo-padded.png",
     "scheme": "nfchunt",
