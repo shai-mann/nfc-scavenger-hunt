@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed deep linking on android
 - Fixed a bug where settings were cut off on android
 - Fixed a bug where the function for unlocking a clue could not fetch the image for that clue
+- Fixed a bug with requires_previous clue-locking mechanism causing such clues to be impossible to unlock
 
 ### Security
 
