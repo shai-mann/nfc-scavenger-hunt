@@ -39,7 +39,7 @@
               "scheme": "nfchunt"
             }
           ],
-          "category": ["DEFAULT"]
+          "category": ["BROWSABLE", "DEFAULT"]
         }
       ],
       "permissions": ["NFC"]
