@@ -8,7 +8,6 @@
     "scheme": "nfchunt",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "deepLinks": true,
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "co.ghostsoftware.nfcscavengerhunt",
@@ -22,7 +21,28 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "co.ghostsoftware.nfcscavengerhunt"
+      "package": "co.ghostsoftware.nfcscavengerhunt",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "nfchunt"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        },
+        {
+          "action": "android.nfc.action.NDEF_DISCOVERED",
+          "data": [
+            {
+              "scheme": "nfchunt"
+            }
+          ],
+          "category": ["DEFAULT"]
+        }
+      ],
+      "permissions": ["NFC"]
     },
     "web": {
       "bundler": "metro",
