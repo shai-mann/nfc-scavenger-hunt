@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed a bug where the status bar does not change theme with the app
 - Fixed a bug where registration submit button was covered by the bottom bar in android
 - Fixed a bug where unlocking clues temporarily showed a retry option
+- Fixed a bug where user's were not correctly sent to the home screen when re-opening the app after registration
 
 ### Security
 
