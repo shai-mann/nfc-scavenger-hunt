@@ -16,7 +16,9 @@ const isRequiresPreviousLocked = async (clue: Clue, userId: string) => {
 
   const numPreviousUnlockedClues = data?.length || 0;
 
-  return numPreviousUnlockedClues !== clue.order_index - 1;
+  // Since count is 1-indexed, if count = 2 and order_index = 2, then we have 2 previous clues unlocked, and are unlocking clue 3.
+  // Therefore, the clue is locked if the count is not equal to the order_index.
+  return numPreviousUnlockedClues !== clue.order_index;
 };
 
 const CLUE_LOCK_PREDICATES: Record<

@@ -7,7 +7,7 @@ import {
   withMethodRestriction,
 } from "../../../lib/api";
 import { isLocked } from "../../../lib/clue-lock-predicates";
-import { supabase } from "../../../lib/supabase";
+import { supabase, supabaseAdmin } from "../../../lib/supabase";
 import { ClueParamsSchema, CompleteClueSchema } from "../../../lib/types";
 
 async function unlockHandler(req: VercelRequest, res: VercelResponse) {
@@ -92,7 +92,7 @@ async function unlockHandler(req: VercelRequest, res: VercelResponse) {
 
     if (imageUrl) {
       // create a public URL for the image from the correct bucket in Supabase
-      const { data: imageURL, error: imageError } = await supabase.storage
+      const { data: imageURL, error: imageError } = await supabaseAdmin.storage
         .from("clue-assets")
         .createSignedUrl(imageUrl, 60);
       // replace the image data with the signed URL, so the original isn't exposed.
@@ -107,9 +107,12 @@ async function unlockHandler(req: VercelRequest, res: VercelResponse) {
     createSuccessResponse(
       res,
       {
+        id: clue.id,
         title: clue.title,
         data: clue.data,
+        bits_name: clue.bits_name,
         order_index: clue.order_index,
+        unlocked_at: new Date().toISOString(),
       },
       201
     );

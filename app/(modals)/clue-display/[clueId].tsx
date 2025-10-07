@@ -70,9 +70,9 @@ export default function ClueDisplayModal() {
 
       if (response.success && response.data) {
         setClue(response.data);
-      } else if (response.error && response.status === 403) {
+      } else if (response.status === 403) {
         // A forbidden response means the clue is not unlocked, so we will attempt to unlock it
-        handleUnlockClue();
+        await handleUnlockClue();
       } else {
         console.error("Error loading clue:", response.error);
         setError("Failed to load clue");
@@ -130,8 +130,6 @@ export default function ClueDisplayModal() {
       </SafeAreaView>
     );
   }
-
-  //
 
   // Show error state
   if (error || !clue) {

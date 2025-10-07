@@ -44,7 +44,7 @@ export default function RootLayout() {
           />
           <Stack.Screen name="+not-found" />
         </Stack>
-        <StatusBar style="auto" />
+        <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
         <PortalHost />
       </ThemeProvider>
     </QueryClientProvider>

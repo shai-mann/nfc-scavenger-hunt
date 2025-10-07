@@ -4,11 +4,10 @@
     "slug": "nfc-scavenger-hunt",
     "version": "0.1.0",
     "orientation": "portrait",
-    "icon": "./assets/images/NFChunt-logo.png",
+    "icon": "./assets/images/NFChunt-logo-padded.png",
     "scheme": "nfchunt",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "deepLinks": true,
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "co.ghostsoftware.nfcscavengerhunt",
@@ -18,11 +17,32 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/NFChunt-logo.png",
+        "foregroundImage": "./assets/images/NFChunt-logo-padded.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "co.ghostsoftware.nfcscavengerhunt"
+      "package": "co.ghostsoftware.nfcscavengerhunt",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "nfchunt"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        },
+        {
+          "action": "android.nfc.action.NDEF_DISCOVERED",
+          "data": [
+            {
+              "scheme": "nfchunt"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ],
+      "permissions": ["NFC"]
     },
     "web": {
       "bundler": "metro",

@@ -1,11 +1,13 @@
 import { apiClient } from "@/lib/api-client";
 import { router } from "expo-router";
-import { useLayoutEffect } from "react";
+import { useEffect } from "react";
 
 export default function Index() {
-  useLayoutEffect(() => {
-    // If the user is registered, redirect to the home screen, otherwise redirect to the registration screen
-    router.replace(apiClient.getUserId() ? "/(tabs)" : "/registration");
+  useEffect(() => {
+    // Wait for userId to be loaded from storage before redirecting
+    apiClient.getUserIdAsync().then((userId) => {
+      router.replace(userId ? "/(tabs)" : "/registration");
+    });
   }, []);
 
   return null;

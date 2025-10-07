@@ -41,6 +41,14 @@ class ApiClient {
     return this.userId;
   }
 
+  async getUserIdAsync(): Promise<string | null> {
+    // Ensure userId is loaded before returning
+    if (this.userId === null) {
+      await this.loadUserId();
+    }
+    return this.userId;
+  }
+
   async clearUserId() {
     this.userId = null;
     try {
