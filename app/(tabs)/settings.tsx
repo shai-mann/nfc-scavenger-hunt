@@ -3,6 +3,7 @@ import { IconSymbol } from "@/components/ui/IconSymbol";
 import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { apiClient } from "@/lib/api-client";
+import { cn } from "@/lib/utils";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { ExternalLink } from "lucide-react-native";
@@ -11,6 +12,7 @@ import {
   ActivityIndicator,
   Alert,
   Linking,
+  Platform,
   ScrollView,
   TouchableOpacity,
   View,
@@ -103,7 +105,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <SafeAreaView className="flex-1 bg-background h-screen">
       <View className="flex flex-row justify-between items-center px-5 py-2 border-b border-border">
         <Text variant="h1" className="text-2xl font-semibold">
           Settings
@@ -111,9 +113,13 @@ export default function SettingsPage() {
       </View>
 
       <ScrollView
-        className="flex-1 px-5 pt-6 mb-20"
+        // In iOS, the scrollview fails to show all content, but on android this issue is not present
+        className={cn("px-5 pt-6", Platform.OS === "ios" && "mb-20")}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{
+          flexGrow: 1,
+        }}
       >
         {/* Profile Section */}
         <View className="mb-8">
